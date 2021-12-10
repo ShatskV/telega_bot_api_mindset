@@ -1,2 +1,2 @@
-# telega_bot_api_mindset
+# telegram_bot_mindset
 Telegram bot for Mindset Picpack

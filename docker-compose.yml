@@ -1,0 +1,24 @@
+version: "3.7"
+
+networks:
+  iu_app_backend_dev:
+    external: true
+    name: iu_app_backend_dev
+
+services:
+  telegram_bot_dev:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: telegram_bot_dev
+    hostname: telegram_bot
+    restart: always
+    # depends_on:
+    #   - db_dev
+    volumes:
+      - .:/telegrambot_mindset
+    networks:
+      - iu_app_backend_dev
+    ports:
+      - 35611:5011
+
