@@ -1,5 +1,4 @@
-import pprint
-import json
+
 import logging
 import os
 import requests
@@ -8,11 +7,10 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext, storage
 import warnings
 from aiogram import Bot, Dispatcher, executor, types
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, document, message
-from sqlalchemy.sql.expression import text
-from utils import get_desc_and_tags, set_result_rating, silentremove, form_file_path_url
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from utils import get_desc_and_tags, set_result_rating
 from aiogram import types
-from aiogram.types import ContentType
+
 
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
@@ -27,10 +25,9 @@ bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot, storage=storage)
 
 
-class ImageDlg(StatesGroup):
+class Form(StatesGroup):
     action = State()
     rating = State()
-    ru = State()
     # end = State() 
 
 
@@ -48,103 +45,75 @@ inline_kb_rat = InlineKeyboardMarkup().row(inline_btn_rat_1, inline_btn_rat_2, i
                                                 inline_btn_rat_4, inline_btn_rat_5)
 
 
-# @dp.message_handler(lambda message: message.text and message.text.lower().startswith('http'), content_types=['text'])
-# async def get_desc_and_tags_url(message: types.Message, state: FSMContext):
+@dp.message_handler(content_types=['URL'])
+async def get_desc_and_tags_url(message: types.Message, state: FSMContext):
+    await message.reply("url получен")
+
+
+@dp.message_handler(content_types=['photo'])
+async def get_desc_and_tags_file(message: types.Message, state: FSMContext):
+    os.makedirs('downloads', exist_ok=True)
+    file_name = os.path.join('downloads', f'{message.photo[-1].file_id}.jpg')
+    await message.photo[-1].download(file_name)
+    async with state.proxy() as data:
+        data['path'] = file_name
+    await Form.action.set()
+    await message.reply("Что выхотите сделать с фото?", reply_markup=inline_kb_desc)
     
-#     await message.reply("url получен")
-@dp.callback_query_handler(lambda c: c.data and c.data.startswith('rat'), state=ImageDlg.rating)
-async def process_callback_rating(callback_query: types.CallbackQuery, state: FSMContext):
+    
+# @dp.message_handler(state=Form.action)
+# async def process_action(message: types.Message, state: FSMContext):
+#     async with state.proxy() as data:
+#         await message.reply(f"path = {data['path']}")
+#     await Form.next()
+#     await message.reply(f'Ваша оценка?')
+
+
+# @dp.message_handler(state=Form.end)
+# async def process_rating(message: types.Message, state: FSMContext):
+#     await state.finish()
+#     await message.reply(f'диалог завершен!')
+    
+
+@dp.callback_query_handler(lambda c: c.data and c.data.startswith('desc'), state=Form.action)
+async def process_callback_button1(callback_query: types.CallbackQuery, state: FSMContext):
+    await bot.answer_callback_query(callback_query.id)
+    lang = callback_query.data[-2:]
+    async with state.proxy() as data:
+        path = data['path']
+        answer, uuid = get_desc_and_tags(path_url=path, lang=lang)
+        data['uuid'] = uuid
+   
+    # await bot.delete_message(chat_id=callback_query.from_user.id, 
+                # message_id=callback_query.message.message_id)
+    await Form.next()
+    # await bot.send_message(callback_query.from_user.id, answer)
+    await bot.edit_message_text(chat_id=callback_query.from_user.id, 
+                message_id=callback_query.message.message_id, text=answer)
+    await bot.send_message(callback_query.from_user.id, 'Оцените результат, пожалуйста!', reply_markup=inline_kb_rat)
+
+
+@dp.callback_query_handler(lambda c: c.data and c.data.startswith('rat'), state=Form.rating)
+async def process_callback_button1(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
     rating = int(callback_query.data[-1])
     async with state.proxy() as data:
         answer = set_result_rating(uuid=data['uuid'], rating=rating)
-        data['message_id'] = callback_query.message.message_id
+   
     await state.finish()
+    
+    # print(stikers)
+    # await bot.send_message(callback_query.from_user.id, stikers)
+    # await bot.send_message(callback_query.from_user.id, sticker='CAADAgADOQADfyesDlKEqOOd72VKAg')
     await bot.edit_message_text(chat_id=callback_query.from_user.id, 
                 message_id=callback_query.message.message_id, text='Спасибо за оценку!')
-    if rating in [4,5]:            
-        await bot.send_sticker(callback_query.from_user.id, 
+    await bot.send_sticker(callback_query.from_user.id, 
                 sticker='CAACAgIAAxkBAAEDh6BhwO-eB4xfFmR-mQ1HMwQ428C0jgACQQADKA9qFPDp0yN1HEZhIwQ')
-    if rating in [1,2]:
-        await bot.send_sticker(callback_query.from_user.id, 
-                sticker='CAACAgIAAxkBAAEDiP5hwgLDNwcNTzgrDu8ZZ2YNvq_fUAACiAEAAjDUnRGjlneuNUhvFCME')
-    if rating == 3: 
-        await bot.send_sticker(callback_query.from_user.id, 
-                sticker='CAACAgIAAxkBAAEDiQdhwgPcAkOhbWaFMp5rl178jlICmQACmgADO2AkFBhQ2N6IkxSUIwQ')
+    await bot.send_sticker(callback_query.from_user.id, 
+                sticker='CAACAgIAAxkBAAEDh55hwOzARttw5C32P5jOdmPjTxHLHAACPwADKA9qFGqgL_9ebv15IwQ')
 
 
-# @dp.callback_query_handler(state=ImageDlg.rating)
-@dp.message_handler(lambda message: 'image/' in message.document.mime_type , content_types='document')
-@dp.message_handler(lambda message: message.text and message.text.lower().startswith('http'), state='*')
-@dp.message_handler(content_types=['photo'], state='*')
-async def get_desc_and_tags_file(message: types.Message, state: FSMContext):
-    del_path = os.path.join('downloads', str(message.from_user.id))
-    silentremove(del_path)
-    async with state.proxy() as data:
-        if data.get('message_id'):
-            await bot.edit_message_text(chat_id=message.from_user.id, 
-                message_id=data['message_id']+1,
-                text='Действие не выбрано!', reply_markup=None)
-    await state.reset_state()
-
-    filename, is_url = await form_file_path_url(message)
-    async with state.proxy() as data:
-        data['path_url'] = filename
-        data['is_url'] = is_url
-        data['message_id'] = message.message_id
-    await ImageDlg.action.set()
-    await message.reply("Что выхотите сделать с фото?", reply_markup=inline_kb_desc)
-    
-    
-# @dp.message_handler(state=ImageDlg.action)
-# async def process_action(message: types.Message, state: FSMContext):
-#     async with state.proxy() as data:
-#         await message.reply(f"path = {data['path']}")
-#     await ImageDlg.next()
-#     await message.reply(f'Ваша оценка?')
-
-
-# @dp.message_handler(state=ImageDlg.end)
-# async def process_rating(message: types.Message, state: FSMContext):
-#     await state.finish()
-#     await message.reply(f'диалог завершен!')
-
-
-
-
-@dp.callback_query_handler(lambda c: c.data and c.data.startswith('rat'), state=ImageDlg.ru)
-async def process_callback_ru(callback_query: types.CallbackQuery, state: FSMContext):
-    await state.finish()
-    await bot.send_message(callback_query.from_user.id, 'я в ру')
-
-
-@dp.callback_query_handler(lambda c: c.data and c.data.startswith('desc'), state=ImageDlg.action)
-async def process_callback_desc(callback_query: types.CallbackQuery, state: FSMContext):
-    await bot.answer_callback_query(callback_query.id)
-    lang = callback_query.data[-2:]
-    async with state.proxy() as data:
-        path = data['path_url']
-        answer, uuid = get_desc_and_tags(path_url=path, lang=lang, url_method=data.get('is_url'))
-        data['uuid'] = uuid
-        data['message_id'] = callback_query.message.message_id
-
-   
-    # await bot.delete_message(chat_id=callback_query.from_user.id, 
-                # message_id=callback_query.message.message_id)
-    if lang == 'en':
-        await ImageDlg.next()
-    else: 
-        await state.set_state(ImageDlg.ru)
-    # await bot.send_message(callback_query.from_user.id, answer)
-    await bot.edit_message_text(chat_id=callback_query.from_user.id, 
-                message_id=callback_query.message.message_id, text=answer)
-    await bot.send_message(callback_query.from_user.id, f'Оцените результат, пожалуйста! {callback_query}', reply_markup=inline_kb_rat)
-
-
-
-
-
-# @dp.callback_query_handler(lambda c: c.data=='button2', state=ImageDlg.action)
+# @dp.callback_query_handler(lambda c: c.data=='button2', state=Form.action)
 # async def process_callback_button2(callback_query: types.CallbackQuery):
 #     await bot.answer_callback_query(callback_query.id)
 #     await bot.send_message(callback_query.from_user.id, 'Нажата вторая кнопка!')
@@ -185,19 +154,10 @@ async def send_welcome(message: types.Message):
     await message.reply(f"result = {answer}")
 
 
-@dp.message_handler(lambda message: 'image/' in message.document.mime_type , content_types=ContentType.DOCUMENT)
-async def recieve_file(message: types.Message, state: FSMContext):
-    # photo = message.photo.pop()
-
-    # print(f'PHOTO! {photo}')
-    print('PHOTO')
-    print(message)
-
-
 @dp.message_handler()
 async def echo(message: types.Message):
     print(message)
-    await message.answer(message.text)
+    await message.answer(types.InputFile.from_url(message.text))
 
 
 if __name__ == '__main__':
