@@ -1,4 +1,5 @@
 import settings
+import asyncio
 from datetime import datetime
 import enum
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean, Enum
@@ -7,19 +8,32 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.sql.sqltypes import DateTime
-engine = create_engine(settings.SQLALCHEMY_URI)
-db_session = scoped_session(sessionmaker(bind=engine))
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_scoped_session
+from sqlalchemy.future import select
+from sqlalchemy import update
+# engine = create_engine(settings.SQLALCHEMY_URI)
+engine = create_async_engine(settings.SQLALCHEMY_URI)
+async_session = sessionmaker(bind=engine,  expire_on_commit=False, class_=AsyncSession)
+async_session = sessionmaker(bind=engine,  expire_on_commit=True, class_=AsyncSession)
 
+# async_session_factory = sessionmaker(some_async_engine, class_=_AsyncSession)
+
+# AsyncSession = async_scoped_session(async_session_factory, scopefunc=asyncio.current_task)
+# async_session = AsyncSession()
 Base = declarative_base()
-Base.query = db_session.query_property()
+# Base.query = async_session.query_property()
 
 
-class Settings(enum.Enum):
+class MyEnumMeta(enum.EnumMeta): 
+    def __contains__(cls, item): 
+        return item in [v.value for v in cls.__members__.values()] 
+
+class TagFormat(enum.Enum, metaclass=MyEnumMeta):
     instagram = 'instagram'
     list_tags = 'list'
 
 
-class Action(enum.Enum):
+class Action(enum.Enum, metaclass=MyEnumMeta):
     desc_tags = 'iu_decs_and_tags'
     desc = 'iu_decs'
     tags = 'iu_tags'
@@ -28,13 +42,14 @@ class Action(enum.Enum):
 class TgUser(Base):
     __tablename__ = 'tg_users'
     id = Column(Integer, primary_key=True)
-    tg_user_id = Column(Integer, nullable=False, index=True)
+    tg_user_id = Column(Integer, nullable=False, index=True, unique=True)
     user_id = Column(Integer, index=True)
     tg_user_name  = Column(String(255))
     first_name = Column(String(255))
     last_name = Column(String(255))
-    lang = Column(String(4))
-    tags_format = Column(Enum(Settings), default=Settings.instagram)
+    lang = Column(String(4), default='en')
+    tags_format = Column(Enum(TagFormat), default=TagFormat.instagram)
+    rating = Column(Boolean, default=True)
     free_act = Column(Integer())
     create_at = Column(DateTime(timezone=False), default=datetime.utcnow())
     bot_feedback = Column(String(10000))
@@ -47,7 +62,7 @@ class TgUser(Base):
 class TgAction(Base):
     __tablename__ = 'tg_actions'
     id = Column(Integer, primary_key=True)
-    tg_user_id = Column(Integer, ForeignKey(TgUser.tg_user_id))
+    tg_user_id = Column(Integer, ForeignKey(TgUser.tg_user_id, ondelete='CASCADE'))
     # tg_msg_id = Column(Integer)
     action_type = Column(Enum(Action))
     image_uuid = Column(String(50), index=True)
@@ -64,12 +79,31 @@ class TgAction(Base):
 
 class TgChatHistory(Base):
     __tablename__ = 'tg_chat_history'
-    id = Column(Integer)
+    id = Column(Integer, primary_key=True)
     tg_msg_id = Column(Integer)
     tg_user_id = Column(Integer, index=True)
     user_msg = Column(String(10000))
     bot_msg = Column(String(10000))
 
 
-if __name__ == '__main__':
-    Base.metadata.create_all(bind=engine)
+async def async_create():
+    async with engine.begin() as conn:   
+        await conn.run_sync(Base.metadata.drop_all)
+        await conn.run_sync(Base.metadata.create_all)
+
+
+ 
+
+
+if __name__ == '__main__': 
+    # asyncio.run(add_object_to_db())
+    # asyncio.run(print_user())
+    # asyncio.run(update_user(22553))
+    asyncio.run(async_create())
+
+
+
+    
+
+
+
