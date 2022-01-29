@@ -1,3 +1,4 @@
+from typing import Collection
 import settings
 import asyncio
 from datetime import datetime
@@ -17,7 +18,6 @@ async_session = sessionmaker(bind=engine,  expire_on_commit=False, class_=AsyncS
 async_session = sessionmaker(bind=engine,  expire_on_commit=True, class_=AsyncSession)
 
 # async_session_factory = sessionmaker(some_async_engine, class_=_AsyncSession)
-
 # AsyncSession = async_scoped_session(async_session_factory, scopefunc=asyncio.current_task)
 # async_session = AsyncSession()
 Base = declarative_base()
@@ -63,7 +63,6 @@ class TgAction(Base):
     __tablename__ = 'tg_actions'
     id = Column(Integer, primary_key=True)
     tg_user_id = Column(Integer, ForeignKey(TgUser.tg_user_id, ondelete='CASCADE'))
-    # tg_msg_id = Column(Integer)
     action_type = Column(Enum(Action))
     image_uuid = Column(String(50), index=True)
     image_name = Column(String)
@@ -81,10 +80,10 @@ class TgChatHistory(Base):
     __tablename__ = 'tg_chat_history'
     id = Column(Integer, primary_key=True)
     tg_msg_id = Column(Integer)
-    tg_user_id = Column(Integer, index=True)
+    tg_user_id = Column(Integer, ForeignKey(TgUser.tg_user_id, ondelete='CASCADE'))
     user_msg = Column(String(10000))
     bot_msg = Column(String(10000))
-
+    bot_message_edit = Column(Boolean, default=False)
 
 async def async_create():
     async with engine.begin() as conn:   
@@ -96,9 +95,6 @@ async def async_create():
 
 
 if __name__ == '__main__': 
-    # asyncio.run(add_object_to_db())
-    # asyncio.run(print_user())
-    # asyncio.run(update_user(22553))
     asyncio.run(async_create())
 
 

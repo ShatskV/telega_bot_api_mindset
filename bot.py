@@ -28,10 +28,7 @@ dp = Dispatcher(bot, storage=storage)
 
 
 class ImageDlg(StatesGroup):
-    # action = State()
     rating = State()
-    # ru = State()
-    # end = State() 
 
 
 class ChangeTags(StatesGroup):
@@ -108,6 +105,7 @@ async def process_callback_rating(callback_query: types.CallbackQuery, state: FS
     await update_user(callback_query.from_user.id, tags_format=tags_format)
     await state.finish()
     # tag_value = tags_format.value
+    await state.finish()
     await bot.edit_message_text(chat_id=callback_query.from_user.id, 
                 message_id=callback_query.message.message_id, text=f'Tags format change to {tags_format.value}')
 
@@ -128,24 +126,20 @@ async def process_callback_rating(callback_query: types.CallbackQuery, state: FS
 @dp.message_handler(lambda message: message.text and message.text.lower().startswith('http'), state='*')
 @dp.message_handler(content_types=['photo'], state='*')
 async def get_desc_and_tags_image(message: types.Message, state: FSMContext):
-    del_path = os.path.join('downloads', str(message.from_user.id))
-    silentremove(del_path)
-    # await state.reset_state()
+    await state.reset_state()
 
     user = await get_or_create_user_in_db(message)
     
     filename, is_url = await form_file_path_url(message)
     async with state.proxy() as data:
-        # data['path_url'] = filename
-        # data['is_url'] = is_url
         data['lang'] = user.lang
-        # data['rating'] = user.rating
     answer, uuid = await async_get_desc(path_url=filename, 
                                         lang=user.lang, 
                                         tags_format=user.tags_format.value,
                                         url_method=is_url)
     await state.update_data(uuid = uuid)
-    print(f'______________{answer}________________')
+    del_path = os.path.join('downloads', str(message.from_user.id))
+    silentremove(del_path)
     for item in answer:
         await message.answer(item)
     if user.rating:
@@ -224,13 +218,13 @@ async def check_edit_keyboard_message(msg: types.Message, state: FSMContext):
             if data.get('inline'):
                 await bot.edit_message_text(chat_id=msg.from_user.id, 
                     message_id=msg.message_id-1,
-                    text='Действие не выбрано!', reply_markup=None)
+                    text='No action selected!', reply_markup=None)
     state.finish()
 
 
 @dp.message_handler(content_types=['text'], state='*')
 async def echo(message: types.Message, state):
-    pass
+    await message.answer("Don't understand you!")
 
 
 if __name__ == '__main__':
