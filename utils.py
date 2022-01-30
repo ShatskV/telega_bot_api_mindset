@@ -1,13 +1,10 @@
-import requests
 import aiohttp
 import settings
 import os
-import asyncio
+import logging
 import shutil
-from requests.exceptions import (ConnectionError, HTTPError, Timeout)
 from aiogram import types
-from aiogram.dispatcher import FSMContext
-
+from aiohttp.client_exceptions import ClientError
 
 async def async_get_desc(path_url=None, lang='en', tags_format='list', url_method=False):
     if url_method:
@@ -16,27 +13,19 @@ async def async_get_desc(path_url=None, lang='en', tags_format='list', url_metho
                     'lang': lang}}
     else:
         api_route = settings.file_api
-        # payload = {'files': {'image_file': open(path_url, 'rb')},
-        #             'data': {'lang': lang}}
         payload = {'data': {'image_file': open(path_url, 'rb'),
                     'lang': lang}}
     url = settings.url
     url = url + api_route
     timeout = aiohttp.ClientTimeout(connect=settings.ml_models_timeout[0],
                                     sock_read=settings.ml_models_timeout[1])
-    async with aiohttp.ClientSession(timeout=timeout) as session:
-        # try:
-        async with session.post(url, **payload) as resp:
-            result = await resp.json()
-        # path_url = 'https://cdn.motor1.com/images/mgl/3PMJX/s3/car-for-whole-life.webp'
-        # async with session.post(url, json={'imageUrl': path_url,
-        #             'lang': lang}) as resp:
-        #     result = await resp.json()
-    # try:
-    #     response = requests.post(url, **payload, timeout=settings.ml_models_timeout)
-    #     result = response.json()
-            # except  (ConnectionError, HTTPError, Timeout):
-            #     result = {'error': 'server unavailable'}
+    try:                               
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.post(url, **payload) as resp:
+                result = await resp.json()
+    except ClientError as e:
+        logging.exception(f'ClienError: {e}')
+        result = {'error': 'ClientError'}
     answer, uuid = make_desc_tags_answer(result, tags_format)
     return answer, uuid
 
@@ -48,9 +37,13 @@ async def async_set_rating(uuid, rating):
                'rating': rating}
     timeout = aiohttp.ClientTimeout(connect=settings.ml_models_timeout[0],
                                     sock_read=settings.ml_models_timeout[1])
-    async with aiohttp.ClientSession(timeout=timeout) as session:
-        async with session.post(url, json=payload) as resp:
-            result = await resp.json()
+    try:
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.post(url, json=payload) as resp:
+                result = await resp.json()
+    except ClientError as e:
+        logging.exception(f'ClienError: {e}')
+        result = {'error': 'ClientError'}
     return result
 
 

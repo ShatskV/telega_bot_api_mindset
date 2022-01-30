@@ -1,0 +1,149 @@
+# English translations for PROJECT.
+# Copyright (C) 2022 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2022-01-30 22:01+0300\n"
+"PO-Revision-Date: 2022-01-30 19:09+0300\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.1\n"
+
+#: handlers.py:48
+msgid "#tag1 #tag2 #tag3"
+msgstr ""
+
+#: handlers.py:49
+msgid "tag1, tag2, tag3"
+msgstr ""
+
+#: handlers.py:57
+msgid "On"
+msgstr ""
+
+#: handlers.py:58
+msgid "Off"
+msgstr ""
+
+#: handlers.py:71 handlers.py:158
+msgid "on"
+msgstr ""
+
+#: handlers.py:73 handlers.py:160
+msgid "off"
+msgstr ""
+
+#: handlers.py:75 handlers.py:161
+msgid "Rating was turned {}"
+msgstr ""
+
+#: handlers.py:86
+msgid "Language was changed to English!"
+msgstr ""
+
+#: handlers.py:100 handlers.py:196
+msgid "Tags format change to {}"
+msgstr ""
+
+#: handlers.py:111
+msgid "Thank you for rating!"
+msgstr ""
+
+#: handlers.py:139
+msgid "Please, rate the result!"
+msgstr ""
+
+#: handlers.py:147
+msgid "Choose rating setting:"
+msgstr ""
+
+#: handlers.py:163
+msgid "Wrong format! Should be /rating + 1/0/on/off"
+msgstr ""
+
+#: handlers.py:171
+msgid "Choose your language:"
+msgstr ""
+
+#: handlers.py:176
+msgid "Language was change to English!"
+msgstr ""
+
+#: handlers.py:178
+msgid "Language not supported or wrong format!"
+msgstr ""
+
+#: handlers.py:186
+msgid "Choose tags format:"
+msgstr ""
+
+#: handlers.py:198
+msgid "Wrong tags format!"
+msgstr ""
+
+#: handlers.py:205
+msgid ""
+"<b>Picpack Bot</b>\n"
+"Bot generates description and list of tags for any image. Just send a "
+"picture\n"
+"Also it supports link to picture\n"
+"Visite ower site: https://app.picpack.io/demo_ru\n"
+"Chat with owner: @FrankShikhaliev\n"
+"Below is a list of available commands, also they could have arguments (in"
+" brackets):\n"
+"/lang - change language ({})\n"
+"/tags - change format tags (list, instagram)\n"
+"/rating - rate result on/off (1, 0, on, off)\n"
+"/feedback - leave feedback about our bot"
+msgstr ""
+
+#: handlers.py:226
+msgid "No action selected!"
+msgstr ""
+
+#: handlers.py:235
+msgid "Thank you for feedback!"
+msgstr ""
+
+#: handlers.py:242
+msgid "Please, leave feedback:"
+msgstr ""
+
+#: handlers.py:247
+msgid "Don't understand you!"
+msgstr ""
+
+#: settings.py:18
+msgid "list"
+msgstr ""
+
+#: settings.py:19
+msgid "instagram"
+msgstr ""
+
+#~ msgid "Choose your language"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "<b>Picpack Bot</b>\n"
+#~ "Bot generates description and list of tags for any image\n"
+#~ "Visite ower site: https://app.picpack.io/demo_ru\n"
+#~ "Chat with owner: @FrankShikhaliev\n"
+#~ "Below is a list of available "
+#~ "commands, also they could have arguments"
+#~ " (in brackets):\n"
+#~ "/lang - change language ({})\n"
+#~ "/tags - change format tags (list, instagram)\n"
+#~ "/rating - rate result on/off (1, 0, on, off)\n"
+#~ "/feedback - leave feedback about our bot"
+#~ msgstr ""
+

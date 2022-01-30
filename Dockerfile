@@ -11,4 +11,4 @@ RUN --mount=type=cache,target=/root/.cache \
 
 COPY . .
 
-ENTRYPOINT ["python3.9", "bot.py"]
+ENTRYPOINT ["python3.9", "bot_start.py"]

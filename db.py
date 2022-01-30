@@ -28,6 +28,7 @@ class MyEnumMeta(enum.EnumMeta):
     def __contains__(cls, item): 
         return item in [v.value for v in cls.__members__.values()] 
 
+
 class TagFormat(enum.Enum, metaclass=MyEnumMeta):
     instagram = 'instagram'
     list_tags = 'list'
@@ -89,9 +90,6 @@ async def async_create():
     async with engine.begin() as conn:   
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
-
-
- 
 
 
 if __name__ == '__main__': 
