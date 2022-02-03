@@ -1,21 +1,24 @@
-from typing import Collection
-import settings
+"""DB models."""
 import asyncio
-from datetime import datetime
 import enum
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean, Enum
-from sqlalchemy.exc import SQLAlchemyError
+from datetime import datetime
+
+from sqlalchemy import (Boolean, Column, DateTime, Enum, Integer, String,
+                        create_engine)
+from sqlalchemy.ext.asyncio import (AsyncSession, async_scoped_session,
+                                    create_async_engine)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.sql.sqltypes import DateTime
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_scoped_session
-from sqlalchemy.future import select
-from sqlalchemy import update
+
+import settings
+
 # engine = create_engine(settings.SQLALCHEMY_URI)
+
 engine = create_async_engine(settings.SQLALCHEMY_URI)
 async_session = sessionmaker(bind=engine,  expire_on_commit=False, class_=AsyncSession)
-async_session = sessionmaker(bind=engine,  expire_on_commit=True, class_=AsyncSession)
+# async_session = sessionmaker(bind=engine,  expire_on_commit=True, class_=AsyncSession)
 
 # async_session_factory = sessionmaker(some_async_engine, class_=_AsyncSession)
 # AsyncSession = async_scoped_session(async_session_factory, scopefunc=asyncio.current_task)
@@ -24,9 +27,9 @@ Base = declarative_base()
 # Base.query = async_session.query_property()
 
 
-class MyEnumMeta(enum.EnumMeta): 
-    def __contains__(cls, item): 
-        return item in [v.value for v in cls.__members__.values()] 
+class MyEnumMeta(enum.EnumMeta):
+    def __contains__(cls, item):
+        return item in [v.value for v in cls.__members__.values()]
 
 
 class TagFormat(enum.Enum, metaclass=MyEnumMeta):
@@ -45,7 +48,7 @@ class TgUser(Base):
     id = Column(Integer, primary_key=True)
     tg_user_id = Column(Integer, nullable=False, index=True, unique=True)
     user_id = Column(Integer, index=True)
-    tg_user_name  = Column(String(255))
+    tg_user_name = Column(String(255))
     first_name = Column(String(255))
     last_name = Column(String(255))
     lang = Column(String(4), default='en')
@@ -58,7 +61,7 @@ class TgUser(Base):
 
     def __repr__(self):
         return f'<Telegram_user {self.id}>'
-    
+
 
 class TgAction(Base):
     __tablename__ = 'tg_actions'
@@ -86,18 +89,12 @@ class TgChatHistory(Base):
     bot_msg = Column(String(10000))
     bot_message_edit = Column(Boolean, default=False)
 
+
 async def async_create():
-    async with engine.begin() as conn:   
+    async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
 
 
-if __name__ == '__main__': 
+if __name__ == '__main__':
     asyncio.run(async_create())
-
-
-
-    
-
-
-

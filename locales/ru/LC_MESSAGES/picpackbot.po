@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-01-30 22:01+0300\n"
+"POT-Creation-Date: 2022-02-01 18:33+0300\n"
 "PO-Revision-Date: 2022-01-30 19:09+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ru\n"
@@ -19,126 +19,159 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.9.1\n"
 
-#: handlers.py:48
+#: handlers.py:15
+msgid "list"
+msgstr "список"
+
+#: handlers.py:16
+msgid "instagram"
+msgstr "инстаграм"
+
+#: handlers.py:60
 msgid "#tag1 #tag2 #tag3"
 msgstr "#тег1, #тег2, #тег3"
 
-#: handlers.py:49
+#: handlers.py:61
 msgid "tag1, tag2, tag3"
 msgstr "тег1, тег2, тег3"
 
-#: handlers.py:57
+#: handlers.py:68
 msgid "On"
 msgstr "Вкл."
 
-#: handlers.py:58
+#: handlers.py:69
 msgid "Off"
 msgstr "Выкл."
 
-#: handlers.py:71 handlers.py:158
+#: handlers.py:82 handlers.py:167
 msgid "on"
 msgstr "включен"
 
-#: handlers.py:73 handlers.py:160
+#: handlers.py:84 handlers.py:169
 msgid "off"
 msgstr "выключен"
 
-#: handlers.py:75 handlers.py:161
-msgid "Rating was turned {}"
-msgstr "Рейтинг был"
+#: handlers.py:87
+msgid "Rating was turned {state}"
+msgstr "Рейтинг был {state}"
 
-#: handlers.py:86
+#: handlers.py:98
 msgid "Language was changed to English!"
 msgstr "Язык был изменен на Русский!"
 
-#: handlers.py:100 handlers.py:196
-msgid "Tags format change to {}"
-msgstr "Формат тегов изменен на"
-
 #: handlers.py:111
+msgid "Tags format change to {fmt}"
+msgstr "Формат тегов изменен на {fmt}"
+
+#: handlers.py:122
 msgid "Thank you for rating!"
 msgstr "Спасибо за оценку!"
 
-#: handlers.py:139
+#: handlers.py:148
 msgid "Please, rate the result!"
 msgstr "Пожалуйста, оцените результат!"
 
-#: handlers.py:147
+#: handlers.py:156
 msgid "Choose rating setting:"
 msgstr "Выберите настройку рейтинга:"
 
-#: handlers.py:163
+#: handlers.py:170
+msgid "Rating was turned {}"
+msgstr "Рейтинг был"
+
+#: handlers.py:172
 msgid "Wrong format! Should be /rating + 1/0/on/off"
 msgstr "Неправильный формат! Должно быть /rating + 1/0/on/off"
 
-#: handlers.py:171
-#, fuzzy
+#: handlers.py:180
 msgid "Choose your language:"
 msgstr "Выберите ваш язык:"
 
-#: handlers.py:176
-#, fuzzy
+#: handlers.py:185
 msgid "Language was change to English!"
 msgstr "Язык был изменен на Русский!"
 
-#: handlers.py:178
+#: handlers.py:187
 msgid "Language not supported or wrong format!"
 msgstr "Язык не поддерживается или неправильный формат!"
 
-#: handlers.py:186
+#: handlers.py:195
 msgid "Choose tags format:"
 msgstr "Выберите формат тегов:"
 
-#: handlers.py:198
+#: handlers.py:205
+msgid "Tags format change to {}"
+msgstr "Формат тегов изменен на"
+
+#: handlers.py:207
 msgid "Wrong tags format!"
 msgstr "Неправильный формат тегов!"
 
-#: handlers.py:205
-#, fuzzy
+#: handlers.py:214
 msgid ""
 "<b>Picpack Bot</b>\n"
-"Bot generates description and list of tags for any image. Just send a picture\n"
+"Bot generates description and list of tags for any image. Just send a "
+"picture\n"
 "Also it supports link to picture\n"
-"Visite ower site: https://app.picpack.io/demo_ru\n"
+"Visite ower site: http://app.picpack.io/demo_en\n"
 "Chat with owner: @FrankShikhaliev\n"
-"Below is a list of available commands, also they could have arguments (in brackets):\n"
+"Below is a list of available commands, also they could have arguments (in"
+" brackets):\n"
 "/lang - change language ({})\n"
 "/tags - change format tags (list, instagram)\n"
 "/rating - rate result on/off (1, 0, on, off)\n"
 "/feedback - leave feedback about our bot"
 msgstr ""
 "<b>Picpack Bot</b>\n"
-"Бот генерирует описание и список тегов для любого изображения. Просто отправте картинку\n"
+"Бот генерирует описание и список тегов для любого изображения. Просто "
+"отправте картинку\n"
 "Так же он поддержтвает ссылки на картинки\n"
-"Посетите наш веб-сайт: https://app.picpack.io/demo_ru\n"
+"Посетите наш веб-сайт: http://app.picpack.io/demo_ru\n"
 "Чат с владельцем: @FrankShikhaliev\n"
-"Ниже список доступных команд, также они могут иметь аргументы (в скобках)\n"
+"Ниже список доступных команд, также они могут иметь аргументы (в скобках)"
+"\n"
 "/lang - изменить язык ({})\n"
 "/tags - изменить формат тегов (list, instagram)\n"
 "/rating - оценить результат on/off (1, 0, on, off)\n"
 "/feedback - оставить отзыв о нашем боте"
 
-#: handlers.py:226
+#: handlers.py:235
 msgid "No action selected!"
 msgstr "Действие не выбрано!"
 
-#: handlers.py:235
+#: handlers.py:244
 msgid "Thank you for feedback!"
 msgstr "Спасибо за отзыв!"
 
-#: handlers.py:242
+#: handlers.py:251
 msgid "Please, leave feedback:"
 msgstr "Пожалуйста, оставьте отзыв:"
 
-#: handlers.py:247
+#: handlers.py:256
 msgid "Don't understand you!"
 msgstr "Не понимаю Вас!"
 
-#: settings.py:18
-msgid "list"
-msgstr "список"
+#: utils.py:55
+msgid "<b>Invalid photo url!<b>"
+msgstr "<b>Неверный адрес фото!</b>"
 
-#: settings.py:19
-msgid "instagram"
-msgstr "инстаграм"
+#: utils.py:57
+msgid "<b>Service unavailable!</b>"
+msgstr "<b>Сервис недоступен!</b>"
+
+#: utils.py:60
+msgid "<b>Description:</b>"
+msgstr "<b>Описание:</b>"
+
+#: utils.py:65 utils.py:90
+msgid "Service unavailable!"
+msgstr "Сервис недоступен!"
+
+#: utils.py:66
+msgid "<b>Tags:</b>"
+msgstr "<b>Теги:</b>"
+
+#: utils.py:88
+msgid "Sorry, tags not found!"
+msgstr "Извините, теги не найдены!"
 

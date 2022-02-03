@@ -1,6 +1,9 @@
+"""Bot settings."""
 import os
-from dotenv import load_dotenv
 from pathlib import Path
+
+from dotenv import load_dotenv
+
 load_dotenv()
 url = os.environ.get('URL')
 ml_models_timeout = (2, 7)
@@ -12,9 +15,8 @@ rating_api = desc_api + 'rating'
 
 SQLALCHEMY_URI = os.environ.get('SQLALCHEMY_URI')
 
-langs=['en', 'ru']
+langs = ['en', 'ru']
 default_lang = 'en'
-
 
 I18N_DOMAIN = 'picpackbot'
 BASE_DIR = Path(__file__).parent

@@ -1,3 +1,4 @@
+"""Bot start."""
 from aiogram import executor
 
 

@@ -1,36 +1,44 @@
-import aiohttp
-import settings
-import os
+"""Utils for bot."""
 import logging
+import os
 import shutil
+
 from aiogram import types
+
+import aiohttp
 from aiohttp.client_exceptions import ClientError
 
-async def async_get_desc(path_url=None, lang='en', tags_format='list', url_method=False):
+from bot_init import _
+
+import settings
+
+
+async def async_get_desc(path_url, lang, tags_format, url_method=False):
+    """Select method and get resquest from API."""
     if url_method:
         api_route = settings.url_api
         payload = {'json': {'imageUrl': path_url,
-                    'lang': lang}}
+                            'lang': lang}}
     else:
         api_route = settings.file_api
         payload = {'data': {'image_file': open(path_url, 'rb'),
-                    'lang': lang}}
+                            'lang': lang}}
     url = settings.url
     url = url + api_route
     timeout = aiohttp.ClientTimeout(connect=settings.ml_models_timeout[0],
                                     sock_read=settings.ml_models_timeout[1])
-    try:                               
+    try:
         async with aiohttp.ClientSession(timeout=timeout) as session:
             async with session.post(url, **payload) as resp:
                 result = await resp.json()
-    except ClientError as e:
-        logging.exception(f'ClienError: {e}')
-        result = {'error': 'ClientError'}
+    except (ClientError, ValueError):
+        raise
     answer, uuid = make_desc_tags_answer(result, tags_format)
     return answer, uuid
 
 
 async def async_set_rating(uuid, rating):
+    """Set rating for image by uuid."""
     url = settings.url
     url = url + settings.rating_api
     payload = {'image_uuid': uuid,
@@ -41,28 +49,39 @@ async def async_set_rating(uuid, rating):
         async with aiohttp.ClientSession(timeout=timeout) as session:
             async with session.post(url, json=payload) as resp:
                 result = await resp.json()
-    except ClientError as e:
-        logging.exception(f'ClienError: {e}')
-        result = {'error': 'ClientError'}
-    return result
+    except (ClientError, ValueError):
+        raise
+    #     result = {'error': 'ClientError'}
+    # return result
+
+
+async def async_get_request(url, send_msg=True, **payload):
+    timeout = aiohttp.ClientTimeout(connect=settings.ml_models_timeout[0],
+                                    sock_read=settings.ml_models_timeout[1])
+    try:
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.post(url, **payload) as resp:
+                result = await resp.json()
+    except (ClientError, ValueError):
+        raise
 
 
 def make_desc_tags_answer(result, tags_format):
     answer = []
     if result.get('error'):
         if result['error'] == 'INVALID_URL':
-            error = '<b>Invalid photo url!<b>'
+            error = _('<b>Invalid photo url!<b>')
         else:
-            error = '<b>Service unavailable!</b>'
+            error = _('<b>Service unavailable!</b>')
         answer.append(error)
         return answer, None
-    answer.append('<b>Description:</b>')
+    answer.append(_('<b>Description:</b>'))
     if result.get('description'):
         desc = result['description']
         answer.append(desc.capitalize())
-    else: 
-        answer.append('Service unavailable!')
-    answer.append('<b>Tags:</b>')
+    else:
+        answer.append(_('Service unavailable!'))
+    answer.append(_('<b>Tags:</b>'))
     tags = result.get('tags')
     if tags and len(tags) > 0:
         i = 0
@@ -84,9 +103,9 @@ def make_desc_tags_answer(result, tags_format):
             answer_tags += ' '
         answer.append(answer_tags)
     elif len(tags) == 0:
-        answer.append('Sorry, tags not found!')
-    else: 
-        answer.append('Service unavailable!')
+        answer.append(_('Sorry, tags not found!'))
+    else:
+        answer.append(_('Service unavailable!'))
     return answer, result['image_uuid']
 
 
@@ -99,15 +118,15 @@ async def form_file_path_url(msg: types.Message):
         file_name = os.path.join(user_path,
                                  f"{msg.document.file_unique_id}.{msg.document.mime_type.split('/')[1]}")
         await msg.document.download(file_name)
-    else: 
+    else:
         file_name = os.path.join(user_path, f'{msg.photo[-1].file_id}.jpg')
         await msg.photo[-1].download(file_name)
     return file_name, False
-    
-    
+
+
 def silentremove(path):
     shutil.rmtree(path, ignore_errors=True)
-    
+
 
 if __name__ == '__main__':
     silentremove('downloads')

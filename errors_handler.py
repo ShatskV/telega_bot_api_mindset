@@ -1,17 +1,23 @@
-from bot_init import dp
+"""Errors handler."""
 import logging
 from asyncio.exceptions import TimeoutError
-from sqlalchemy.exc import SQLAlchemyError
 
-from aiogram.utils.exceptions import (Unauthorized, InvalidQueryID, TelegramAPIError,
-                                          CantDemoteChatCreator, MessageNotModified, MessageToDeleteNotFound,
-                                          MessageTextIsEmpty, RetryAfter,
-                                          CantParseEntities, MessageCantBeDeleted)
+from aiogram.utils.exceptions import (CantDemoteChatCreator, CantParseEntities,
+                                      InvalidQueryID, MessageCantBeDeleted,
+                                      MessageNotModified, MessageTextIsEmpty,
+                                      MessageToDeleteNotFound, RetryAfter,
+                                      TelegramAPIError, Unauthorized)
+
+from aiohttp import ClientError
+
+from bot_init import dp
+
+from sqlalchemy.exc import SQLAlchemyError
 
 
 @dp.errors_handler()
 async def errors_handler(update, exception):
-    
+
     if isinstance(exception, CantDemoteChatCreator):
         logging.debug("Can't demote chat creator")
         return True
@@ -55,4 +61,11 @@ async def errors_handler(update, exception):
     if isinstance(exception, SQLAlchemyError):
         logging.exception(f'SQLAlchemyError: {exception} \nUpdate: {update}')
         return True
+    if isinstance(exception, ClientError):
+        logging.exception(f'ClientError: {exception} \nUpdate: {update}')
+        return True
+    if isinstance(exception, ValueError):
+        logging.exception(f'ValueError: {exception} \nUpdate: {update}')
+        return True
+
     logging.exception(f'Update: {update} \n{exception}')
