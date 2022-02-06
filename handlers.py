@@ -19,22 +19,32 @@ from utils import (async_get_desc, async_set_rating, form_file_path_url,
 
 
 class ImageDlg(StatesGroup):
+    """States for image dialog."""
+
     rating = State()
 
 
 class ChangeTags(StatesGroup):
+    """States for change format dialog."""
+
     choose = State()
 
 
 class ChangeLang(StatesGroup):
+    """States for change lang dialog."""
+
     choose = State()
 
 
 class ChangeRateSet(StatesGroup):
+    """States for change rating setting dialog."""
+
     choose = State()
 
 
 class Feedback(StatesGroup):
+    """States for feedback dialog."""
+
     leave = State()
 
 
@@ -100,8 +110,7 @@ async def process_callback_rating(callback_query: types.CallbackQuery, state: FS
 async def process_callback_rating(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
     new_lang = callback_query.data[-2:]
-    await get_or_create_user_in_db(callback_query)
-    await update_user(callback_query.from_user.id, lang=new_lang)
+    await update_user(callback_query, lang=new_lang)
     await state.finish()
     await bot.edit_message_text(chat_id=callback_query.from_user.id,
                                 message_id=callback_query.message.message_id,
@@ -112,9 +121,8 @@ async def process_callback_rating(callback_query: types.CallbackQuery, state: FS
 async def process_callback_rating(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
     tags_fmt = callback_query.data[5:]
-    await get_or_create_user_in_db(callback_query)
     tags_format = getattr(TagFormat, tags_fmt)
-    await update_user(callback_query.from_user.id, tags_format=tags_format)
+    await update_user(callback_query, tags_format=tags_format)
     await state.finish()
     tag_format = get_tag_name(tags_format.value)
     await bot.edit_message_text(chat_id=callback_query.from_user.id,
@@ -173,8 +181,7 @@ async def rating_off(message: types.Message, state: FSMContext):
             rating = True
         else:
             rating = False
-        await get_or_create_user_in_db(message)
-        await update_user(message.from_user.id, rating=rating)
+        await update_user(message, rating=rating)
         if rating:
             rating = _('on')
         else:
@@ -192,10 +199,9 @@ async def change_lang(message: types.Message, state: FSMContext):
         await message.answer(_('Choose your language:'), reply_markup=inline_kb_langs)
         return
     if new_lang in settings.langs:
-        await get_or_create_user_in_db(message)
-        await update_user(message.from_user.id, lang=new_lang)
+        await update_user(message, lang=new_lang)
         await message.answer(_('Language was change to English!', locale=new_lang))
-    else: 
+    else:
         await message.answer(_('Language not supported or wrong format!'))
 
 
@@ -205,14 +211,13 @@ async def tags_format(message: types.Message, state: FSMContext):
     if not tags_fmt:
         await ChangeTags.choose.set()
         await message.answer(_('Choose tags format:'), reply_markup=get_tag_kb())
-        return 
+        return
     tags_fmt = tags_fmt.lower()
     if tags_fmt in TagFormat:
-        await get_or_create_user_in_db(message)
         if tags_fmt == 'list':
             tags_fmt += '_tags'
         tags_fmt = getattr(TagFormat, tags_fmt)
-        await update_user(message.from_user.id, tags_format=tags_fmt.name)
+        await update_user(message, tags_format=tags_fmt.name)
         tag_value = get_tag_name(tags_fmt.value)
         await message.answer(_('Tags format change to {}').format(tag_value))
     else:
@@ -250,8 +255,7 @@ async def check_edit_keyboard_message(msg: types.Message, state: FSMContext):
 
 @dp.message_handler(lambda message: message.text, state=Feedback.leave)
 async def update_feedback(message: types.Message, state: FSMContext):
-    await get_or_create_user_in_db(message)
-    await update_user(message.from_user.id, bot_feedback=message.text)
+    await update_user(message, bot_feedback=message.text)
     await state.finish()
     await message.answer(_('Thank you for feedback!'))
 
@@ -265,4 +269,5 @@ async def leave_feedback(message: types.Message, state: FSMContext):
 
 @dp.message_handler(content_types=['text'], state='*')
 async def echo(message: types.Message, state):
+    await get_or_create_user_in_db(message)
     await message.answer(_("Don't understand you!"))

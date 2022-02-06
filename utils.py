@@ -25,14 +25,7 @@ async def async_get_desc(path_url, lang, tags_format, url_method=False):
                             'lang': lang}}
     url = settings.url
     url = url + api_route
-    timeout = aiohttp.ClientTimeout(connect=settings.ml_models_timeout[0],
-                                    sock_read=settings.ml_models_timeout[1])
-    try:
-        async with aiohttp.ClientSession(timeout=timeout) as session:
-            async with session.post(url, **payload) as resp:
-                result = await resp.json()
-    except (ClientError, ValueError):
-        raise
+    result = await async_get_request(url, **payload)
     answer, uuid = make_desc_tags_answer(result, tags_format)
     return answer, uuid
 
@@ -41,29 +34,30 @@ async def async_set_rating(uuid, rating):
     """Set rating for image by uuid."""
     url = settings.url
     url = url + settings.rating_api
-    payload = {'image_uuid': uuid,
-               'rating': rating}
-    timeout = aiohttp.ClientTimeout(connect=settings.ml_models_timeout[0],
-                                    sock_read=settings.ml_models_timeout[1])
-    try:
-        async with aiohttp.ClientSession(timeout=timeout) as session:
-            async with session.post(url, json=payload) as resp:
-                result = await resp.json()
-    except (ClientError, ValueError):
-        raise
-    #     result = {'error': 'ClientError'}
-    # return result
+    payload = {'exc_true': True,
+               'json': {'image_uuid': uuid,
+                        'rating': rating}}
+    result = await async_get_request(url, **payload)
+    print(result)
+    if result.get('error'):
+        logging.error(f'API rating return err: {result}')
 
 
-async def async_get_request(url, send_msg=True, **payload):
+async def async_get_request(url, exc_true=False, **payload):
     timeout = aiohttp.ClientTimeout(connect=settings.ml_models_timeout[0],
                                     sock_read=settings.ml_models_timeout[1])
     try:
         async with aiohttp.ClientSession(timeout=timeout) as session:
             async with session.post(url, **payload) as resp:
                 result = await resp.json()
-    except (ClientError, ValueError):
-        raise
+    except (ClientError, ValueError) as e:
+        if not exc_true:
+            logging.critical(f'API rating error: {e}')
+        else:
+            raise e
+    finally:
+        await session.close()
+    return result
 
 
 def make_desc_tags_answer(result, tags_format):

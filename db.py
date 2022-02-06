@@ -3,15 +3,16 @@ import asyncio
 import enum
 from datetime import datetime
 
-from sqlalchemy import (Boolean, Column, DateTime, Enum, Integer, String,
+from sqlalchemy import (Boolean, Column, DateTime, Integer, String,
                         create_engine)
+from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.ext.asyncio import (AsyncSession, async_scoped_session,
                                     create_async_engine)
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.sql.sqltypes import DateTime
-
+from sqlalchemy.sql import func
 import settings
 
 # engine = create_engine(settings.SQLALCHEMY_URI)
@@ -52,10 +53,10 @@ class TgUser(Base):
     first_name = Column(String(255))
     last_name = Column(String(255))
     lang = Column(String(4), default='en')
-    tags_format = Column(Enum(TagFormat), default=TagFormat.instagram)
+    tags_format = Column(ENUM(TagFormat), default=TagFormat.instagram)
     rating = Column(Boolean, default=True)
     free_act = Column(Integer())
-    create_at = Column(DateTime(timezone=False), default=datetime.utcnow())
+    create_at = Column(DateTime(timezone=False), default=func.now())
     bot_feedback = Column(String(10000))
     is_banned = Column(Boolean, default=False)
 
@@ -67,13 +68,13 @@ class TgAction(Base):
     __tablename__ = 'tg_actions'
     id = Column(Integer, primary_key=True)
     tg_user_id = Column(Integer, ForeignKey(TgUser.tg_user_id, ondelete='CASCADE'))
-    action_type = Column(Enum(Action))
+    action_type = Column(ENUM(Action))
     image_uuid = Column(String(50), index=True)
     image_name = Column(String)
     lang = Column(String(4))
     image_type = Column(String())
     image_size = Column(Integer)
-    create_at = Column(DateTime(timezone=False), default=datetime.utcnow())
+    create_at = Column(DateTime(timezone=False), default=func.now())
     responce = Column(String(20000))
 
     def __repr__(self):
@@ -88,6 +89,7 @@ class TgChatHistory(Base):
     user_msg = Column(String(10000))
     bot_msg = Column(String(10000))
     bot_message_edit = Column(Boolean, default=False)
+    create_at = Column(DateTime(timezone=False), default=func.now())
 
 
 async def async_create():

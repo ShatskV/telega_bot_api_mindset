@@ -8,7 +8,6 @@ WORKDIR /telegrambot_mindset
 COPY requirements.txt .
 RUN --mount=type=cache,target=/root/.cache \
     pip install -r requirements.txt
-
 COPY . .
 
 ENTRYPOINT ["python3.9", "bot_start.py"]

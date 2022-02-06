@@ -4,6 +4,9 @@ networks:
   iu_app_backend_dev:
     external: true
     name: iu_app_backend_dev
+  # net_public_nginx:
+  #   external: true
+  #   name: net_public_nginx
 
 services:
   telegram_bot_dev:
@@ -19,6 +22,7 @@ services:
       - .:/telegrambot_mindset
     networks:
       - iu_app_backend_dev
+      # - net_public_nginx
     ports:
       - 35611:5011
 
