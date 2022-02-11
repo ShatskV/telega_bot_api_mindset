@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-02-01 18:33+0300\n"
+"POT-Creation-Date: 2022-02-11 13:57+0300\n"
 "PO-Revision-Date: 2022-01-30 19:09+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -18,95 +18,95 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.9.1\n"
 
-#: handlers.py:15
+#: handlers.py:52
 msgid "list"
 msgstr ""
 
-#: handlers.py:16
+#: handlers.py:53
 msgid "instagram"
 msgstr ""
 
-#: handlers.py:60
+#: handlers.py:78
 msgid "#tag1 #tag2 #tag3"
 msgstr ""
 
-#: handlers.py:61
+#: handlers.py:79
 msgid "tag1, tag2, tag3"
 msgstr ""
 
-#: handlers.py:68
+#: handlers.py:86
 msgid "On"
 msgstr ""
 
-#: handlers.py:69
+#: handlers.py:87
 msgid "Off"
 msgstr ""
 
-#: handlers.py:82 handlers.py:167
+#: handlers.py:100 handlers.py:192
 msgid "on"
 msgstr ""
 
-#: handlers.py:84 handlers.py:169
+#: handlers.py:102 handlers.py:194
 msgid "off"
 msgstr ""
 
-#: handlers.py:87
+#: handlers.py:106
 msgid "Rating was turned {state}"
 msgstr ""
 
-#: handlers.py:98
+#: handlers.py:117
 msgid "Language was changed to English!"
 msgstr ""
 
-#: handlers.py:111
-msgid "Tags format change to {fmt}"
-msgstr ""
-
-#: handlers.py:122
-msgid "Thank you for rating!"
+#: handlers.py:130
+msgid "Tags format was changed to {fmt}"
 msgstr ""
 
 #: handlers.py:148
+msgid "Thank you for rating!"
+msgstr ""
+
+#: handlers.py:174
 msgid "Please, rate the result!"
 msgstr ""
 
-#: handlers.py:156
+#: handlers.py:182
 msgid "Choose rating setting:"
 msgstr ""
 
-#: handlers.py:170
+#: handlers.py:195
 msgid "Rating was turned {}"
 msgstr ""
 
-#: handlers.py:172
+#: handlers.py:197
 msgid "Wrong format! Should be /rating + 1/0/on/off"
 msgstr ""
 
-#: handlers.py:180
+#: handlers.py:205
 msgid "Choose your language:"
 msgstr ""
 
-#: handlers.py:185
+#: handlers.py:209
 msgid "Language was change to English!"
 msgstr ""
 
-#: handlers.py:187
+#: handlers.py:211
 msgid "Language not supported or wrong format!"
 msgstr ""
 
-#: handlers.py:195
+#: handlers.py:219
 msgid "Choose tags format:"
 msgstr ""
 
-#: handlers.py:205
-msgid "Tags format change to {}"
+#: handlers.py:228
+msgid "Tags format was changed to {tag_value}"
 msgstr ""
 
-#: handlers.py:207
+#: handlers.py:230
 msgid "Wrong tags format!"
 msgstr ""
 
-#: handlers.py:214
+#: handlers.py:237
 msgid ""
 "<b>Picpack Bot</b>\n"
 "Bot generates description and list of tags for any image. Just send a "
@@ -122,45 +122,46 @@ msgid ""
 "/feedback - leave feedback about our bot"
 msgstr ""
 
-#: handlers.py:235
+#: handlers.py:257
 msgid "No action selected!"
 msgstr ""
 
-#: handlers.py:244
+#: handlers.py:266
 msgid "Thank you for feedback!"
 msgstr ""
 
-#: handlers.py:251
+#: handlers.py:273
 msgid "Please, leave feedback:"
 msgstr ""
 
-#: handlers.py:256
+#: handlers.py:279
 msgid "Don't understand you!"
 msgstr ""
 
-#: utils.py:55
+#: utils.py:67
 msgid "<b>Invalid photo url!<b>"
 msgstr ""
 
-#: utils.py:57
+#: utils.py:69
 msgid "<b>Service unavailable!</b>"
 msgstr ""
 
-#: utils.py:60
+#: utils.py:72
 msgid "<b>Description:</b>"
 msgstr ""
 
-#: utils.py:65 utils.py:90
+#: utils.py:77 utils.py:102
 msgid "Service unavailable!"
 msgstr ""
 
-#: utils.py:66
+#: utils.py:78
 msgid "<b>Tags:</b>"
 msgstr ""
 
-#: utils.py:88
+#: utils.py:100
 msgid "Sorry, tags not found!"
 msgstr ""
+
 
 #~ msgid "Choose your language"
 #~ msgstr ""
@@ -194,5 +195,11 @@ msgstr ""
 #~ "/tags - change format tags (list, instagram)\n"
 #~ "/rating - rate result on/off (1, 0, on, off)\n"
 #~ "/feedback - leave feedback about our bot"
+#~ msgstr ""
+
+#~ msgid "Tags format change to {fmt}"
+#~ msgstr ""
+
+#~ msgid "Tags format change to {}"
 #~ msgstr ""
 

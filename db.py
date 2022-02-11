@@ -92,6 +92,12 @@ class TgChatHistory(Base):
     create_at = Column(DateTime(timezone=False), default=func.now())
 
 
+class CallbackQuery(Base):
+    __tablename__ = 'RatingQuery'
+    message_id = Column(Integer, primary_key=True, index=True)
+    image_uuid = Column(String(50))
+
+
 async def async_create():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)

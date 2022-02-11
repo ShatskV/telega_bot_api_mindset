@@ -12,15 +12,15 @@ from lang_middleware import setup_middleware
 
 with warnings.catch_warnings():
     warnings.filterwarnings('ignore', category=DeprecationWarning)
-
+from settings import WEBHOOK_URL
 # webhook settings
-WEBHOOK_HOST = 'https://bot.picpack.com'
-WEBHOOK_PATH = ''
-WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
+# WEBHOOK_HOST = 'https://bot.picpack.com'
+# WEBHOOK_PATH = ''
+# WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
 
-# webserver settings
-WEBAPP_HOST = 'localhost'  # or ip
-WEBAPP_PORT = 3001
+# # webserver settings
+# WEBAPP_HOST = 'localhost'  # or ip
+# WEBAPP_PORT = 3001
 
 
 storage = MemoryStorage()

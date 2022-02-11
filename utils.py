@@ -38,7 +38,6 @@ async def async_set_rating(uuid, rating):
                'json': {'image_uuid': uuid,
                         'rating': rating}}
     result = await async_get_request(url, **payload)
-    print(result)
     if result.get('error'):
         logging.error(f'API rating return err: {result}')
 
@@ -48,7 +47,7 @@ async def async_get_request(url, exc_true=False, **payload):
                                     sock_read=settings.ml_models_timeout[1])
     try:
         async with aiohttp.ClientSession(timeout=timeout) as session:
-            async with session.post(url, **payload) as resp:
+            async with session.post(url, headers=settings.USER_AGENT, **payload) as resp:
                 result = await resp.json()
     except (ClientError, ValueError) as e:
         if not exc_true:

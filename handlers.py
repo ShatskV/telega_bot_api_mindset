@@ -89,13 +89,13 @@ def get_rate_kb():
     return inline_kb_rating
 
 
-@dp.callback_query_handler(lambda c: c.data and c.data.startswith('rating'), state=ChangeRateSet.choose)
+@dp.callback_query_handler(lambda c: c.data and c.data.startswith('rating'), state='*')
 async def process_callback_rating(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
     rating = callback_query.data[-1:]
     await get_or_create_user_in_db(callback_query)
     rating = bool(int(rating))
-    await update_user(callback_query.from_user.id, rating=rating)
+    await update_user(callback_query, rating=rating)
     if rating:
         rating = _('on')
     else:
@@ -106,7 +106,7 @@ async def process_callback_rating(callback_query: types.CallbackQuery, state: FS
                                 text=_('Rating was turned {state}').format(state=rating))
 
 
-@dp.callback_query_handler(lambda c: c.data and c.data.startswith('lang'), state=ChangeLang.choose)
+@dp.callback_query_handler(lambda c: c.data and c.data.startswith('lang'), state='*')
 async def process_callback_rating(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
     new_lang = callback_query.data[-2:]
@@ -117,7 +117,7 @@ async def process_callback_rating(callback_query: types.CallbackQuery, state: FS
                                 text=_('Language was changed to English!', locale=new_lang))
 
 
-@dp.callback_query_handler(lambda c: c.data and c.data.startswith('tags'), state=ChangeTags.choose)
+@dp.callback_query_handler(lambda c: c.data and c.data.startswith('tags'), state='*')
 async def process_callback_rating(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
     tags_fmt = callback_query.data[5:]
@@ -127,16 +127,23 @@ async def process_callback_rating(callback_query: types.CallbackQuery, state: FS
     tag_format = get_tag_name(tags_format.value)
     await bot.edit_message_text(chat_id=callback_query.from_user.id,
                                 message_id=callback_query.message.message_id,
-                                text=_('Tags format change to {fmt}').format(fmt=tag_format))
+                                text=_('Tags format was changed to {fmt}').format(fmt=tag_format))
 
 
-@dp.callback_query_handler(lambda c: c.data and c.data.startswith('rat'), state=ImageDlg.rating)
+@dp.callback_query_handler(lambda c: c.data and c.data.startswith('rat_'), state=ImageDlg.rating)
 async def process_callback_rating(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
     rating = int(callback_query.data[-1])
     async with state.proxy() as data:
-        await async_set_rating(uuid=data['uuid'], rating=rating)
-    await state.finish()
+        uuid = data.get('uuid')
+        if uuid:
+            await async_set_rating(uuid=uuid, rating=rating)
+        # msg_id = data.get('msg_id')
+    # if uuid and (callback_query.message.message_id == msg_id+1):
+    
+    await state.reset_state()
+    # else:
+    #     text = _('Sorry, raiting already unavaible for this photo!')
     await bot.edit_message_text(chat_id=callback_query.from_user.id,
                                 message_id=callback_query.message.message_id,
                                 text=_('Thank you for rating!'))
@@ -147,7 +154,7 @@ async def process_callback_rating(callback_query: types.CallbackQuery, state: FS
 @dp.message_handler(content_types=['photo'], state='*')
 async def get_desc_and_tags_image(message: types.Message, state: FSMContext):
     # await state.reset_state()
-    await state.finish()
+    await state.reset_state()
 
     user = await get_or_create_user_in_db(message)
 
@@ -157,7 +164,11 @@ async def get_desc_and_tags_image(message: types.Message, state: FSMContext):
                                         lang=user.lang,
                                         tags_format=user.tags_format.value,
                                         url_method=is_url)
-    await state.update_data(uuid=uuid)
+    async with state.proxy() as data:
+        data['uuid'] = uuid
+        # data['msg_id'] = message.message_id
+    # await state.set_data(uuid=uuid, msg_id=message.message_id)
+
     del_path = os.path.join('downloads', str(message.from_user.id))
     silentremove(del_path)
     for item in answer:
@@ -166,7 +177,7 @@ async def get_desc_and_tags_image(message: types.Message, state: FSMContext):
         await ImageDlg.rating.set()
         # await state.update_data(inline=True)
         await message.reply(_('Please, rate the result!'), reply_markup=inline_kb_rat)
-
+        # await state.update_data(msg_id=message.message_id)
 
 @dp.message_handler(commands='rating', state='*')
 async def rating_off(message: types.Message, state: FSMContext):
@@ -219,7 +230,7 @@ async def tags_format(message: types.Message, state: FSMContext):
         tags_fmt = getattr(TagFormat, tags_fmt)
         await update_user(message, tags_format=tags_fmt.name)
         tag_value = get_tag_name(tags_fmt.value)
-        await message.answer(_('Tags format change to {}').format(tag_value))
+        await message.answer(_('Tags format was changed to {tag_value}').format(tag_value=tag_value))
     else:
         await message.answer(_('Wrong tags format!'))
 

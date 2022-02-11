@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-02-01 18:33+0300\n"
+"POT-Creation-Date: 2022-02-11 13:57+0300\n"
 "PO-Revision-Date: 2022-01-30 19:09+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ru\n"
@@ -19,95 +19,95 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.9.1\n"
 
-#: handlers.py:15
+#: handlers.py:52
 msgid "list"
 msgstr "список"
 
-#: handlers.py:16
+#: handlers.py:53
 msgid "instagram"
 msgstr "инстаграм"
 
-#: handlers.py:60
+#: handlers.py:78
 msgid "#tag1 #tag2 #tag3"
 msgstr "#тег1, #тег2, #тег3"
 
-#: handlers.py:61
+#: handlers.py:79
 msgid "tag1, tag2, tag3"
 msgstr "тег1, тег2, тег3"
 
-#: handlers.py:68
+#: handlers.py:86
 msgid "On"
 msgstr "Вкл."
 
-#: handlers.py:69
+#: handlers.py:87
 msgid "Off"
 msgstr "Выкл."
 
-#: handlers.py:82 handlers.py:167
+#: handlers.py:100 handlers.py:192
 msgid "on"
 msgstr "включен"
 
-#: handlers.py:84 handlers.py:169
+#: handlers.py:102 handlers.py:194
 msgid "off"
 msgstr "выключен"
 
-#: handlers.py:87
+#: handlers.py:106
 msgid "Rating was turned {state}"
 msgstr "Рейтинг был {state}"
 
-#: handlers.py:98
+#: handlers.py:117
 msgid "Language was changed to English!"
 msgstr "Язык был изменен на Русский!"
 
-#: handlers.py:111
-msgid "Tags format change to {fmt}"
+#: handlers.py:130
+msgid "Tags format was changed to {fmt}"
 msgstr "Формат тегов изменен на {fmt}"
 
-#: handlers.py:122
+#: handlers.py:148
 msgid "Thank you for rating!"
 msgstr "Спасибо за оценку!"
 
-#: handlers.py:148
+#: handlers.py:174
 msgid "Please, rate the result!"
 msgstr "Пожалуйста, оцените результат!"
 
-#: handlers.py:156
+#: handlers.py:182
 msgid "Choose rating setting:"
 msgstr "Выберите настройку рейтинга:"
 
-#: handlers.py:170
+#: handlers.py:195
 msgid "Rating was turned {}"
 msgstr "Рейтинг был"
 
-#: handlers.py:172
+#: handlers.py:197
 msgid "Wrong format! Should be /rating + 1/0/on/off"
 msgstr "Неправильный формат! Должно быть /rating + 1/0/on/off"
 
-#: handlers.py:180
+#: handlers.py:205
 msgid "Choose your language:"
 msgstr "Выберите ваш язык:"
 
-#: handlers.py:185
+#: handlers.py:209
 msgid "Language was change to English!"
 msgstr "Язык был изменен на Русский!"
 
-#: handlers.py:187
+#: handlers.py:211
 msgid "Language not supported or wrong format!"
 msgstr "Язык не поддерживается или неправильный формат!"
 
-#: handlers.py:195
+#: handlers.py:219
 msgid "Choose tags format:"
 msgstr "Выберите формат тегов:"
 
-#: handlers.py:205
-msgid "Tags format change to {}"
-msgstr "Формат тегов изменен на"
+#: handlers.py:228
+msgid "Tags format was changed to {tag_value}"
+msgstr "Формат тегов изменен на {tag_value}"
 
-#: handlers.py:207
+#: handlers.py:230
 msgid "Wrong tags format!"
 msgstr "Неправильный формат тегов!"
 
-#: handlers.py:214
+#: handlers.py:237
 msgid ""
 "<b>Picpack Bot</b>\n"
 "Bot generates description and list of tags for any image. Just send a "
@@ -135,43 +135,43 @@ msgstr ""
 "/rating - оценить результат on/off (1, 0, on, off)\n"
 "/feedback - оставить отзыв о нашем боте"
 
-#: handlers.py:235
+#: handlers.py:257
 msgid "No action selected!"
 msgstr "Действие не выбрано!"
 
-#: handlers.py:244
+#: handlers.py:266
 msgid "Thank you for feedback!"
 msgstr "Спасибо за отзыв!"
 
-#: handlers.py:251
+#: handlers.py:273
 msgid "Please, leave feedback:"
 msgstr "Пожалуйста, оставьте отзыв:"
 
-#: handlers.py:256
+#: handlers.py:279
 msgid "Don't understand you!"
 msgstr "Не понимаю Вас!"
 
-#: utils.py:55
+#: utils.py:67
 msgid "<b>Invalid photo url!<b>"
 msgstr "<b>Неверный адрес фото!</b>"
 
-#: utils.py:57
+#: utils.py:69
 msgid "<b>Service unavailable!</b>"
 msgstr "<b>Сервис недоступен!</b>"
 
-#: utils.py:60
+#: utils.py:72
 msgid "<b>Description:</b>"
 msgstr "<b>Описание:</b>"
 
-#: utils.py:65 utils.py:90
+#: utils.py:77 utils.py:102
 msgid "Service unavailable!"
 msgstr "Сервис недоступен!"
 
-#: utils.py:66
+#: utils.py:78
 msgid "<b>Tags:</b>"
 msgstr "<b>Теги:</b>"
 
-#: utils.py:88
+#: utils.py:100
 msgid "Sorry, tags not found!"
 msgstr "Извините, теги не найдены!"
 

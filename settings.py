@@ -21,3 +21,13 @@ default_lang = 'en'
 I18N_DOMAIN = 'picpackbot'
 BASE_DIR = Path(__file__).parent
 LOCALES_DIR = BASE_DIR / 'locales'
+
+USER_AGENT = {'User-agent': 'picpack_telegram_bot'}
+
+WEBHOOK_HOST = os.environ.get('WEBHOOK_HOST')
+WEBHOOK_PATH = os.environ.get('WEBHOOK_PATH')
+WEBHOOK_URL = f'{WEBHOOK_HOST}{WEBHOOK_PATH}'
+
+# webserver settings
+WEBAPP_HOST = os.environ.get('WEBAPP_HOST')
+WEBAPP_PORT = os.environ.get('WEBAPP_PORT')

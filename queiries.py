@@ -117,3 +117,5 @@ async def update_obj_in_db(cls, cls_atr, atr_val, **kwargs):
 
     finally:
         await session.close()
+
+

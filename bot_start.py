@@ -1,8 +1,8 @@
 """Bot start."""
 import os
 from aiogram import executor
-from bot_init import (WEBHOOK_PATH, on_shutdown, on_startup,
-                      WEBAPP_HOST, WEBAPP_PORT)
+from bot_init import  on_shutdown, on_startup
+from settings import (WEBHOOK_PATH, WEBAPP_HOST, WEBAPP_PORT)
 
 from aiogram.utils.executor import start_webhook
 from dotenv import load_dotenv

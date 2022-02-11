@@ -2,7 +2,7 @@ FROM python:3.9
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
-
+ENV APP_METHOD=webhook
 WORKDIR /telegrambot_mindset
 
 COPY requirements.txt .
