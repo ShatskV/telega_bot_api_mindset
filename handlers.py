@@ -1,4 +1,5 @@
 """Bot's handlers."""
+import logging
 import os
 
 from aiogram import types
@@ -10,8 +11,8 @@ from bot_init import _, bot, dp
 
 from db import TagFormat
 
-from queiries import get_or_create_user_in_db, update_user
-
+from queiries import (get_or_create_user_in_db, update_user, add_rating_query,
+                      get_uuid_from_db_query)
 import settings
 
 from utils import (async_get_desc, async_set_rating, form_file_path_url,
@@ -130,22 +131,27 @@ async def process_callback_rating(callback_query: types.CallbackQuery, state: FS
                                 text=_('Tags format was changed to {fmt}').format(fmt=tag_format))
 
 
-@dp.callback_query_handler(lambda c: c.data and c.data.startswith('rat_'), state=ImageDlg.rating)
+@dp.callback_query_handler(lambda c: c.data and c.data.startswith('rat_'), state='*')
 async def process_callback_rating(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
     rating = int(callback_query.data[-1])
+    call_msg_id = callback_query.message.message_id
     async with state.proxy() as data:
         uuid = data.get('uuid')
-        if uuid:
-            await async_set_rating(uuid=uuid, rating=rating)
-        # msg_id = data.get('msg_id')
-    # if uuid and (callback_query.message.message_id == msg_id+1):
-    
-    await state.reset_state()
-    # else:
-    #     text = _('Sorry, raiting already unavaible for this photo!')
+        msg_id = data.get('msg_id')
+    if msg_id == call_msg_id:
+        await state.reset_data()
+        if not uuid:
+            uuid = await get_uuid_from_db_query(msg_id=msg_id)
+    else:
+        uuid = await get_uuid_from_db_query(msg_id=call_msg_id)
+    if uuid:
+        await async_set_rating(uuid=uuid, rating=rating)
+    else:
+        logging.error('No uuid for rating!')
+
     await bot.edit_message_text(chat_id=callback_query.from_user.id,
-                                message_id=callback_query.message.message_id,
+                                message_id=call_msg_id,
                                 text=_('Thank you for rating!'))
 
 
@@ -153,8 +159,7 @@ async def process_callback_rating(callback_query: types.CallbackQuery, state: FS
 @dp.message_handler(lambda message: message.text and message.text.lower().startswith('http'), state='*')
 @dp.message_handler(content_types=['photo'], state='*')
 async def get_desc_and_tags_image(message: types.Message, state: FSMContext):
-    # await state.reset_state()
-    await state.reset_state()
+    await state.reset_state(with_data=False)
 
     user = await get_or_create_user_in_db(message)
 
@@ -164,20 +169,20 @@ async def get_desc_and_tags_image(message: types.Message, state: FSMContext):
                                         lang=user.lang,
                                         tags_format=user.tags_format.value,
                                         url_method=is_url)
-    async with state.proxy() as data:
-        data['uuid'] = uuid
-        # data['msg_id'] = message.message_id
-    # await state.set_data(uuid=uuid, msg_id=message.message_id)
+    # async with state.proxy() as data:
+    #     data['uuid'] = uuid
+    await state.update_data(uuid=uuid)
 
     del_path = os.path.join('downloads', str(message.from_user.id))
     silentremove(del_path)
     for item in answer:
-        await message.answer(item)
+        last_msg = await message.answer(item)
     if user.rating:
-        await ImageDlg.rating.set()
-        # await state.update_data(inline=True)
+        msg_id = last_msg.message_id + 1
+        await state.update_data(msg_id=msg_id)
+        await add_rating_query(msg_id=msg_id, uuid=uuid)
         await message.reply(_('Please, rate the result!'), reply_markup=inline_kb_rat)
-        # await state.update_data(msg_id=message.message_id)
+
 
 @dp.message_handler(commands='rating', state='*')
 async def rating_off(message: types.Message, state: FSMContext):

@@ -76,7 +76,7 @@ def make_desc_tags_answer(result, tags_format):
         answer.append(_('Service unavailable!'))
     answer.append(_('<b>Tags:</b>'))
     tags = result.get('tags')
-    if tags and len(tags) > 0:
+    if tags and len(tags) and (type(tags) == list) > 0:
         i = 0
         answer_tags = ''
         num_tags = len(tags)
@@ -87,8 +87,11 @@ def make_desc_tags_answer(result, tags_format):
             patern = '#{}'
 
         for tag in tags:
+            tag_value = tag['tag']
+            if tags_format == 'instagram':
+                tag_value = tag_value.replace(' ', '')
             i += 1
-            answer_tags += patern.format(tag['tag'])
+            answer_tags += patern.format(tag_value)
             if i == num_tags:
                 if tags_format == 'list':
                     answer_tags = answer_tags[:-1]
@@ -98,8 +101,11 @@ def make_desc_tags_answer(result, tags_format):
     elif len(tags) == 0:
         answer.append(_('Sorry, tags not found!'))
     else:
-        answer.append(_('Service unavailable!'))
-    return answer, result['image_uuid']
+        if tags != list:
+            answer.append(tags)
+        else:
+            answer.append(_('Service unavailable!'))
+    return answer, result.get('image_uuid')
 
 
 async def form_file_path_url(msg: types.Message):

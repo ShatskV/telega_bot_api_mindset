@@ -6,7 +6,7 @@ from aiogram.types import Message
 from asyncpg.exceptions import (InterfaceError, InternalClientError,
                                 PostgresError)
 
-from db import TgUser, async_session
+from db import TgUser, CallbackQuery, async_session
 
 import settings
 
@@ -59,6 +59,26 @@ async def get_user_from_db(tg_user_id):
     return user
 
 
+async def add_rating_query(msg_id, uuid):
+    msg = CallbackQuery(message_id=msg_id,
+                        image_uuid=uuid)
+    await add_object_to_db(msg)
+
+
+async def get_uuid_from_db_query(msg_id):
+    """Get user from DB."""
+    result = await get_obj_from_db(cls=CallbackQuery,
+                                   cls_atr='message_id',
+                                   atr_val=msg_id)
+    try:
+        (msg, ) = result.one()
+    except NoResultFound:
+        uuid = None
+    else:
+        uuid = msg.image_uuid
+    return uuid
+
+
 async def get_obj_from_db(cls, cls_atr, atr_val, **kwargs):
     """Get object from DB."""
     query = select(cls).where(getattr(cls, cls_atr) == atr_val)
@@ -77,7 +97,6 @@ async def get_obj_from_db(cls, cls_atr, atr_val, **kwargs):
     finally:
         await session.close()
     return result
-
 
 
 async def add_object_to_db(obj):
@@ -117,5 +136,3 @@ async def update_obj_in_db(cls, cls_atr, atr_val, **kwargs):
 
     finally:
         await session.close()
-
-
