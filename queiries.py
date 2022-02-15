@@ -8,7 +8,7 @@ from asyncpg.exceptions import (InterfaceError, InternalClientError,
 
 from db import TgUser, CallbackQuery, async_session
 
-import settings
+from config import settings
 
 from sqlalchemy import update
 from sqlalchemy.exc import NoResultFound, SQLAlchemyError

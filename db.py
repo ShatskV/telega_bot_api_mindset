@@ -13,7 +13,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.sql.sqltypes import DateTime
 from sqlalchemy.sql import func
-import settings
+from config import settings
 
 # engine = create_engine(settings.SQLALCHEMY_URI)
 

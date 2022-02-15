@@ -19,4 +19,5 @@ pytest-cov==3.0.0
 snowballstemmer==2.1.0
 types-requests==2.25.9
 types-setuptools==57.4.0
-typing-extensions==3.10.0.2
+
+-r base.txt

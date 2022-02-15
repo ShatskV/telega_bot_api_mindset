@@ -4,7 +4,8 @@ from aiogram.contrib.middlewares.i18n import I18nMiddleware
 
 from queiries import get_user_from_db
 
-from settings import I18N_DOMAIN, LOCALES_DIR, default_lang
+# from config import I18N_DOMAIN, LOCALES_DIR, default_lang
+from config import settings
 
 
 async def get_lang(user_id):
@@ -20,11 +21,11 @@ class ACLMiddleware(I18nMiddleware):
     async def get_user_locale(self, action, args):
         """Get locale."""
         user = types.User.get_current()
-        return await get_lang(user.id) or user.locale or default_lang
+        return await get_lang(user.id) or user.locale or settings.default_lang
 
 
 def setup_middleware(dp):
     """Middleware setup."""
-    i18n = ACLMiddleware(I18N_DOMAIN, LOCALES_DIR)
+    i18n = ACLMiddleware(settings.I18N_DOMAIN, settings.LOCALES_DIR)
     dp.middleware.setup(i18n)
     return i18n

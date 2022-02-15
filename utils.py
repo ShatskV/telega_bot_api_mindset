@@ -10,7 +10,7 @@ from aiohttp.client_exceptions import ClientError
 
 from bot_init import _
 
-import settings
+from config import settings
 
 
 async def async_get_desc(path_url, lang, tags_format, url_method=False):

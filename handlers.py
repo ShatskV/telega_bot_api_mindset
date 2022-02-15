@@ -13,7 +13,7 @@ from db import TagFormat
 
 from queiries import (get_or_create_user_in_db, update_user, add_rating_query,
                       get_uuid_from_db_query)
-import settings
+from config import settings
 
 from utils import (async_get_desc, async_set_rating, form_file_path_url,
                    silentremove)
@@ -112,7 +112,7 @@ async def process_callback_rating(callback_query: types.CallbackQuery, state: FS
     await bot.answer_callback_query(callback_query.id)
     new_lang = callback_query.data[-2:]
     await update_user(callback_query, lang=new_lang)
-    await state.finish()
+    await state.reset_state(with_data=False)
     await bot.edit_message_text(chat_id=callback_query.from_user.id,
                                 message_id=callback_query.message.message_id,
                                 text=_('Language was changed to English!', locale=new_lang))
@@ -124,7 +124,7 @@ async def process_callback_rating(callback_query: types.CallbackQuery, state: FS
     tags_fmt = callback_query.data[5:]
     tags_format = getattr(TagFormat, tags_fmt)
     await update_user(callback_query, tags_format=tags_format)
-    await state.finish()
+    await state.reset_state(with_data=False)
     tag_format = get_tag_name(tags_format.value)
     await bot.edit_message_text(chat_id=callback_query.from_user.id,
                                 message_id=callback_query.message.message_id,
@@ -160,9 +160,7 @@ async def process_callback_rating(callback_query: types.CallbackQuery, state: FS
 @dp.message_handler(content_types=['photo'], state='*')
 async def get_desc_and_tags_image(message: types.Message, state: FSMContext):
     await state.reset_state(with_data=False)
-
     user = await get_or_create_user_in_db(message)
-
     filename, is_url = await form_file_path_url(message)
 
     answer, uuid = await async_get_desc(path_url=filename,
@@ -187,8 +185,10 @@ async def get_desc_and_tags_image(message: types.Message, state: FSMContext):
 @dp.message_handler(commands='rating', state='*')
 async def rating_off(message: types.Message, state: FSMContext):
     rating = message.get_args()
+    await state.reset_state(with_data=False)
+
     if not rating:
-        await ChangeRateSet.choose.set()
+        # await ChangeRateSet.choose.set()
         await message.answer(_('Choose rating setting:'), reply_markup=get_rate_kb())
         return
     rating = rating.lower()
@@ -210,8 +210,10 @@ async def rating_off(message: types.Message, state: FSMContext):
 @dp.message_handler(commands='lang', state='*')
 async def change_lang(message: types.Message, state: FSMContext):
     new_lang = message.get_args()
+    await state.reset_state(with_data=False)
+
     if not new_lang:
-        await ChangeLang.choose.set()
+        # await ChangeLang.choose.set()
         await message.answer(_('Choose your language:'), reply_markup=inline_kb_langs)
         return
     if new_lang in settings.langs:
@@ -224,8 +226,10 @@ async def change_lang(message: types.Message, state: FSMContext):
 @dp.message_handler(commands='tags', state='*')
 async def tags_format(message: types.Message, state: FSMContext):
     tags_fmt = message.get_args()
+    await state.reset_state(with_data=False)
+
     if not tags_fmt:
-        await ChangeTags.choose.set()
+        # await ChangeTags.choose.set()
         await message.answer(_('Choose tags format:'), reply_markup=get_tag_kb())
         return
     tags_fmt = tags_fmt.lower()
@@ -281,6 +285,18 @@ async def leave_feedback(message: types.Message, state: FSMContext):
     await get_or_create_user_in_db(message)
     await Feedback.leave.set()
     await message.answer(_('Please, leave feedback:'))
+
+@dp.message_handler(lambda message: 'video/' in message.document.mime_type, content_types='document', state='*')
+@dp.message_handler(content_types=['video'], state='*')
+async def video_unsupport(message: types.Message, state: FSMContext):
+    await state.reset_state(with_data=False)
+    await message.answer(_("Sorry, bot doesn't support videos!"))
+
+
+@dp.message_handler(content_types='document', state='*')
+async def video_unsupport(message: types.Message, state: FSMContext):
+    await state.reset_state(with_data=False)
+    await message.answer(_("Sorry, bot doesn't support this file format!"))
 
 
 @dp.message_handler(content_types=['text'], state='*')

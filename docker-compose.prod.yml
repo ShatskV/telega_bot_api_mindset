@@ -1,28 +1,26 @@
 version: "3.7"
 
 networks:
-  iu_app_backend_dev:
+  iu_app_backend_prod:
     external: true
-    name: iu_app_backend_dev
+    name: iu_app_backend_prod
   net_public_nginx:
     external: true
     name: net_public_nginx
 
 services:
-  telegram_bot_sh_dev:
+  telegram_bot:
     build: 
       context: .
-      dockerfile: Dockerfile
-    container_name: telegram_bot_sh_dev
-    hostname: telegram_bot_sh
+      dockerfile: Dockerfile.prod
+    container_name: telegram_bot
+    hostname: telegram_bot
     restart: always
-    # depends_on:
-      # - db_dev
     volumes:
       - .:/telegrambot_mindset
     networks:
-      - iu_app_backend_dev
+      - iu_app_backend_prod
       - net_public_nginx
     ports:
-      - 35612:5012
+      - 15611:5011
 

@@ -12,14 +12,14 @@ services:
   telegram_bot_dev:
     build: 
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: telegram_bot_dev
-    hostname: telegram_bot
+    hostname: telegram_bot_dev
     restart: always
-    # depends_on:
-      # - db_dev
+    depends_on:
+      - db_dev
     volumes:
-      - .:/telegrambot_mindset
+      - .:/telegrambot_mindset_dev
     networks:
       - iu_app_backend_dev
       - net_public_nginx
