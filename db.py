@@ -4,7 +4,7 @@ import enum
 from datetime import datetime
 
 from sqlalchemy import (Boolean, Column, DateTime, Integer, String,
-                        create_engine)
+                        create_engine, MetaData)
 from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.ext.asyncio import (AsyncSession, async_scoped_session,
                                     create_async_engine)
@@ -24,7 +24,8 @@ async_session = sessionmaker(bind=engine,  expire_on_commit=False, class_=AsyncS
 # async_session_factory = sessionmaker(some_async_engine, class_=_AsyncSession)
 # AsyncSession = async_scoped_session(async_session_factory, scopefunc=asyncio.current_task)
 # async_session = AsyncSession()
-Base = declarative_base()
+metadata = MetaData(schema='bot')
+Base = declarative_base(metadata=metadata)
 # Base.query = async_session.query_property()
 
 
