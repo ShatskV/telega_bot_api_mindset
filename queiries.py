@@ -6,11 +6,11 @@ from aiogram.types import Message
 from asyncpg.exceptions import (InterfaceError, InternalClientError,
                                 PostgresError)
 
-from db import TgUser, CallbackQuery, async_session
+from db import TgGroup, TgUser, CallbackQuery, async_session
 
 from config import settings
 
-from sqlalchemy import update
+from sqlalchemy import true, update
 from sqlalchemy.exc import NoResultFound, SQLAlchemyError
 from sqlalchemy.future import select
 
@@ -28,10 +28,27 @@ async def get_or_create_user_in_db(msg: Message):
                       first_name=getattr(msg.from_user, 'first_name', None),
                       last_name=getattr(msg.from_user, 'username', None),
                       lang=lang)
-        add_success = await add_object_to_db(user)
-        if not add_success:
-            user = None
+        await add_object_to_db(user)
+        # if not add_success:
+        #     user = None
     return user
+
+
+async def get_or_create_group_in_db(msg: Message):
+    """Get or create user in DB."""
+    group_id = msg.chat.id
+    group = await get_group_from_db(group_id)
+    if not group:
+        lang = getattr(msg.from_user, 'language_code', 'en')
+        if lang not in settings.langs:
+            lang = 'en'
+        group = TgGroup(tg_chat_id=group_id,
+                        lang=lang)
+        # print(f'_______{group.tg_chat_id, group.yandex_token}_______')
+        await add_object_to_db(group)
+        # if not add_success:
+        #     group = None
+    return group
 
 
 async def update_user(msg: Message, **kwargs):
@@ -46,6 +63,18 @@ async def update_user(msg: Message, **kwargs):
                            **kwargs)
 
 
+async def update_group(msg: Message, **kwargs):
+    """Update user atributes."""
+    tg_chat_id = msg.chat.id
+    await get_or_create_group_in_db(msg)
+    # query = (update(TgUser).where(TgUser.tg_user_id == tg_user_id)
+            #  .values(**kwargs))
+    await update_obj_in_db(cls=TgGroup,
+                           cls_atr='tg_chat_id',
+                           atr_val=tg_chat_id,
+                           **kwargs)
+
+
 async def get_user_from_db(tg_user_id):
     """Get user from DB."""
     # query = select(TgUser).where(TgUser.tg_user_id == tg_user_id)
@@ -57,6 +86,19 @@ async def get_user_from_db(tg_user_id):
     except NoResultFound:
         user = None
     return user
+
+
+async def get_group_from_db(tg_chat_id):
+    """Get user from DB."""
+    # query = select(TgUser).where(TgUser.tg_user_id == tg_user_id)
+    result = await get_obj_from_db(cls=TgGroup,
+                                   cls_atr='tg_chat_id',
+                                   atr_val=tg_chat_id)
+    try:
+        (group, ) = result.one()
+    except NoResultFound:
+        group = None
+    return group
 
 
 async def add_rating_query(msg_id, uuid):

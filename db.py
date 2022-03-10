@@ -3,7 +3,7 @@ import asyncio
 import enum
 from datetime import datetime
 
-from sqlalchemy import (Boolean, Column, DateTime, Integer, String,
+from sqlalchemy import (Boolean, Column, DateTime, Integer, String, BIGINT,
                         create_engine)
 from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.ext.asyncio import (AsyncSession, async_scoped_session,
@@ -46,6 +46,7 @@ class Action(enum.Enum, metaclass=MyEnumMeta):
 
 class TgUser(Base):
     __tablename__ = 'tg_users'
+
     id = Column(Integer, primary_key=True)
     tg_user_id = Column(Integer, nullable=False, index=True, unique=True)
     user_id = Column(Integer, index=True)
@@ -54,20 +55,38 @@ class TgUser(Base):
     last_name = Column(String(255))
     lang = Column(String(4), default='en')
     tags_format = Column(ENUM(TagFormat), default=TagFormat.instagram)
-    rating = Column(Boolean, default=True)
+    rating = Column(Boolean(), default=True)
+    yandex_on = Column(Boolean(), default=False)
+    yandex_only_save = Column(Boolean(), default=False)
+    yandex_token = Column(String(100))
     free_act = Column(Integer())
     create_at = Column(DateTime(timezone=False), default=func.now())
     bot_feedback = Column(String(10000))
-    is_banned = Column(Boolean, default=False)
+    is_banned = Column(Boolean(), default=False)
 
     def __repr__(self):
         return f'<Telegram_user {self.id}>'
 
 
+class TgGroup(Base):
+    __tablename__ = 'tg_groups'
+    id = Column(Integer(), primary_key=True)
+    tg_chat_id = Column(BIGINT(), nullable=False, index=True, unique=True)
+    lang = Column(String(4), default='en')
+    yandex_on = Column(Boolean(), default=True)
+    yandex_only_save = Column(Boolean(), default=False)
+    yandex_token = Column(String(100))
+
+    def __repr__(self):
+        return f'<Group_id {self.id}>'
+
+
 class TgAction(Base):
     __tablename__ = 'tg_actions'
+
     id = Column(Integer, primary_key=True)
     tg_user_id = Column(Integer, ForeignKey(TgUser.tg_user_id, ondelete='CASCADE'))
+    tg_chat_id = Column(BIGINT(), index=True)
     action_type = Column(ENUM(Action))
     image_uuid = Column(String(50), index=True)
     image_name = Column(String)
@@ -84,8 +103,9 @@ class TgAction(Base):
 class TgChatHistory(Base):
     __tablename__ = 'tg_chat_history'
     id = Column(Integer, primary_key=True)
-    tg_msg_id = Column(Integer)
-    tg_user_id = Column(Integer, ForeignKey(TgUser.tg_user_id, ondelete='CASCADE'))
+    tg_msg_id = Column(Integer())
+    tg_user_id = Column(Integer(), ForeignKey(TgUser.tg_user_id, ondelete='CASCADE'), index=True)
+    tg_chat_id = Column(BIGINT(), index=True)
     user_msg = Column(String(10000))
     bot_msg = Column(String(10000))
     bot_message_edit = Column(Boolean, default=False)
@@ -93,8 +113,8 @@ class TgChatHistory(Base):
 
 
 class CallbackQuery(Base):
-    __tablename__ = 'RatingQuery'
-    message_id = Column(Integer, primary_key=True, index=True)
+    __tablename__ = 'rating_query'
+    message_id = Column(Integer(), primary_key=True, index=True)
     image_uuid = Column(String(50))
 
 

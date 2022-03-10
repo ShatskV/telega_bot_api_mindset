@@ -29,6 +29,12 @@ class Config(object):
     USER_AGENT = {'User-agent': 'picpack_telegram_bot'}
     API_TOKEN = os.environ.get('API_TOKEN')
 
+    # YADISK_TOKEN = os.environ.get('YADISK_TOKEN')
+    YADISK_PATH = '/picpack.io'
+    YADISK_NOTAG = 'undefinied'
+    YADISK_TAG_LANG = 'en'
+    YADISK_AUTH_URL = os.environ.get('YADISK_AUTH_URL')
+
 
 class ProductionConfig(Config):
     """Production config."""
@@ -55,4 +61,5 @@ class DevelopmentConfig(Config):
 methods = {'dev': DevelopmentConfig,
            'prod': ProductionConfig}
 method = os.environ.get('APP_SETTINGS')
-settings = methods.get(method)
+# settings = methods.get(method)
+settings = DevelopmentConfig

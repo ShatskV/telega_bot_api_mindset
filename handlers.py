@@ -1,22 +1,24 @@
 """Bot's handlers."""
+from distutils.command import check
 import logging
 import os
 
-from aiogram import types
+from aiogram import filters, types
 from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.filters import ChatTypeFilter
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from bot_init import _, bot, dp
-
-from db import TagFormat
-
-from queiries import (get_or_create_user_in_db, update_user, add_rating_query,
-                      get_uuid_from_db_query)
 from config import settings
-
-from utils import (async_get_desc, async_set_rating, form_file_path_url,
-                   silentremove)
+from db import TagFormat
+from queiries import (add_rating_query, get_or_create_group_in_db,
+                      get_or_create_user_in_db, get_uuid_from_db_query,
+                      update_group, update_user)
+from utils import (async_get_desc, async_set_rating, check_answer_yandex, check_args_bool,
+                   form_file_path_url, make_desc_tags_answer,
+                   make_tag_folder_for_yandex, silentremove)
+from yandex_disk import yandex_check, yandex_upload
 
 
 class ImageDlg(StatesGroup):
@@ -90,12 +92,16 @@ def get_rate_kb():
     return inline_kb_rating
 
 
+group_chat = ChatTypeFilter(chat_type=['group', 'supergroup'])
+private_chat = ChatTypeFilter(chat_type=types.ChatType.PRIVATE)
+
+
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('rating'), state='*')
 async def process_callback_rating(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
     rating = callback_query.data[-1:]
+    rating = int(rating)
     await get_or_create_user_in_db(callback_query)
-    rating = bool(int(rating))
     await update_user(callback_query, rating=rating)
     if rating:
         rating = _('on')
@@ -155,18 +161,27 @@ async def process_callback_rating(callback_query: types.CallbackQuery, state: FS
                                 text=_('Thank you for rating!'))
 
 
-@dp.message_handler(lambda message: 'image/' in message.document.mime_type, content_types='document', state='*')
-@dp.message_handler(lambda message: message.text and message.text.lower().startswith('http'), state='*')
-@dp.message_handler(content_types=['photo'], state='*')
+@dp.message_handler(private_chat, lambda message: 'image/' in message.document.mime_type, content_types='document', state='*')
+@dp.message_handler(private_chat, lambda message: message.text and message.text.lower().startswith('http'), state='*')
+@dp.message_handler(private_chat, content_types=['photo'], state='*')
 async def get_desc_and_tags_image(message: types.Message, state: FSMContext):
     await state.reset_state(with_data=False)
     user = await get_or_create_user_in_db(message)
     filename, is_url = await form_file_path_url(message)
 
-    answer, uuid = await async_get_desc(path_url=filename,
-                                        lang=user.lang,
-                                        tags_format=user.tags_format.value,
-                                        url_method=is_url)
+    result = await async_get_desc(path_url=filename,
+                                  lang=user.lang,
+                                  url_method=is_url)
+    answer, uuid = make_desc_tags_answer(result=result, tags_format=user.tags_format.value)
+    ya_token = user.yandex_token
+    yandex_answer = None
+    if user.yandex_on and ya_token:
+        tag_folder, uuid = make_tag_folder_for_yandex(result)
+        upload_success = await yandex_upload(tag=tag_folder,
+                                             uuid=uuid,
+                                             filename=filename,
+                                             token=user.yandex_token)
+        yandex_answer = check_answer_yandex(upload_success)
     # async with state.proxy() as data:
     #     data['uuid'] = uuid
     await state.update_data(uuid=uuid)
@@ -175,6 +190,12 @@ async def get_desc_and_tags_image(message: types.Message, state: FSMContext):
     silentremove(del_path)
     for item in answer:
         last_msg = await message.answer(item)
+    if not ya_token and user.yandex_on:
+        await message.reply(_('No token for Yandex.disk! Please, recieve token:\n{url}\nAnd add with '
+                              .format(url=settings.YADISK_AUTH_URL) + 'command /yadisk_token RECIEVED_TOKEN'))
+        return
+    if yandex_answer:
+        await message.reply(yandex_answer)
     if user.rating:
         msg_id = last_msg.message_id + 1
         await state.update_data(msg_id=msg_id)
@@ -182,7 +203,7 @@ async def get_desc_and_tags_image(message: types.Message, state: FSMContext):
         await message.reply(_('Please, rate the result!'), reply_markup=inline_kb_rat)
 
 
-@dp.message_handler(commands='rating', state='*')
+@dp.message_handler(private_chat, commands='rating', state='*')
 async def rating_off(message: types.Message, state: FSMContext):
     rating = message.get_args()
     await state.reset_state(with_data=False)
@@ -191,20 +212,15 @@ async def rating_off(message: types.Message, state: FSMContext):
         # await ChangeRateSet.choose.set()
         await message.answer(_('Choose rating setting:'), reply_markup=get_rate_kb())
         return
-    rating = rating.lower()
-    if rating in ['1', '0', 'on', 'off']:
-        if rating in ['1', 'on']:
-            rating = True
-        else:
-            rating = False
-        await update_user(message, rating=rating)
-        if rating:
-            rating = _('on')
-        else:
-            rating = _('off')
-        await message.answer(_('Rating was turned {}').format(rating))
+    rating = check_args_bool(rating)
+    await update_user(message, rating=rating)
+    if rating is None:
+        await message.answer(_('Wrong format! Should be /rating 1/0/on/off'))
+    if rating:
+        rating = _('on')
     else:
-        await message.answer(_('Wrong format! Should be /rating + 1/0/on/off'))
+        rating = _('off')
+        await message.answer(_('Rating was turned {}').format(rating))
 
 
 @dp.message_handler(commands='lang', state='*')
@@ -214,16 +230,22 @@ async def change_lang(message: types.Message, state: FSMContext):
 
     if not new_lang:
         # await ChangeLang.choose.set()
-        await message.answer(_('Choose your language:'), reply_markup=inline_kb_langs)
+        if message.chat.id > 0:
+            await message.reply(_('Choose your language:'), reply_markup=inline_kb_langs)
+        else:
+            await message.reply(_('No arguments! Should be /lang {lang}'.format(lang='/'.join(settings.langs))))
         return
     if new_lang in settings.langs:
-        await update_user(message, lang=new_lang)
+        if message.chat.id < 0:
+            await update_user(message, lang=new_lang)
+        else:
+            await update_group(message, lang=new_lang)
         await message.answer(_('Language was change to English!', locale=new_lang))
     else:
         await message.answer(_('Language not supported or wrong format!'))
 
 
-@dp.message_handler(commands='tags', state='*')
+@dp.message_handler(private_chat, commands='tags', state='*')
 async def tags_format(message: types.Message, state: FSMContext):
     tags_fmt = message.get_args()
     await state.reset_state(with_data=False)
@@ -244,7 +266,7 @@ async def tags_format(message: types.Message, state: FSMContext):
         await message.answer(_('Wrong tags format!'))
 
 
-@dp.message_handler(commands=['start', 'help'], state='*')
+@dp.message_handler(private_chat, commands=['start', 'help'], state='*')
 async def send_welcome(message: types.Message):
     await get_or_create_user_in_db(message)
     langs = ', '.join(settings.langs)
@@ -273,7 +295,7 @@ async def check_edit_keyboard_message(msg: types.Message, state: FSMContext):
     await state.finish()
 
 
-@dp.message_handler(lambda message: message.text, state=Feedback.leave)
+@dp.message_handler(private_chat, lambda message: message.text, state=Feedback.leave)
 async def update_feedback(message: types.Message, state: FSMContext):
     await update_user(message, bot_feedback=message.text)
     await state.finish()
@@ -286,20 +308,146 @@ async def leave_feedback(message: types.Message, state: FSMContext):
     await Feedback.leave.set()
     await message.answer(_('Please, leave feedback:'))
 
-@dp.message_handler(lambda message: 'video/' in message.document.mime_type, content_types='document', state='*')
-@dp.message_handler(content_types=['video'], state='*')
+
+@dp.message_handler(group_chat, lambda message: 'image/' in message.document.mime_type,
+                    content_types='document', state='*')
+@dp.message_handler(group_chat, content_types=['photo'], state='*')
+async def group_yandex(message: types.Message):
+    group = await get_or_create_group_in_db(message)
+    if not group.yandex_token:
+        await message.reply(_('No token for Yandex.disk! Please, recieve token:{url}')
+                            .format(url=settings.YADISK_AUTH_URL))
+        return
+    filename, is_url = await form_file_path_url(message)
+    if not group.yandex_only_save:
+        result = await async_get_desc(path_url=filename,
+                                      lang=settings.YADISK_TAG_LANG,
+                                      url_method=is_url,
+                                      exc_true=False)
+    else:
+        result = ''
+    tag_folder, uuid = make_tag_folder_for_yandex(result)
+    upload_success = await yandex_upload(tag=tag_folder,
+                                         uuid=uuid,
+                                         filename=filename,
+                                         token=group.yandex_token)
+    answer = await check_answer_yandex(upload_success)
+    if answer:
+        await message.reply(answer)
+    # if upload_success == 'bad_token':
+    #     await message.answer(_('Bad Yandex.disk token!'))
+    #     return
+    # if not upload_success:
+    #     await message.answer(_('Error while uploading to Yandex.disk!'))
+    # await message.answer(f'upload: {upload_success}')
+
+
+# @dp.message_handler(ChatTypeFilter(chat_type=['group', 'supergroup', 'private']), commands='hop')
+# async def get_commands(message: types.Message):
+#     print(message)
+#     await message.answer(message)
+
+
+@dp.message_handler(group_chat, commands='start', state='*')
+async def get_commands(message: types.Message):
+    await message.answer('start!')
+
+
+@dp.message_handler(private_chat, lambda message: 'video/' in message.document.mime_type, content_types='document',
+                    state='*')
+@dp.message_handler(private_chat, content_types=['video'], state='*')
 async def video_unsupport(message: types.Message, state: FSMContext):
     await state.reset_state(with_data=False)
     await message.answer(_("Sorry, bot doesn't support videos!"))
 
 
-@dp.message_handler(content_types='document', state='*')
-async def video_unsupport(message: types.Message, state: FSMContext):
+@dp.message_handler(private_chat, content_types='document', state='*')
+async def file_unsupport(message: types.Message, state: FSMContext):
     await state.reset_state(with_data=False)
     await message.answer(_("Sorry, bot doesn't support this file format!"))
 
 
-@dp.message_handler(content_types=['text'], state='*')
+@dp.message_handler(commands='yadisk_token')
+async def set_yadisk_token(message: types.Message, state: FSMContext):
+    await state.reset_state(with_data=False)
+    token = message.get_args()
+    if not token:
+        await message.reply(_('Token is missing! Should be /yadisk_token YOUR_TOKEN'))
+        return
+    check_token = await yandex_check(token)
+    if not check_token and check_token is not None:
+        await message.reply(_('Token is invalid! Please get new one!'))
+        return
+    if check_token is None:
+        text = _('Token was changed, but not verified')
+    else:
+        text = _('Token was changed and verified')
+    if message.chat.id < 0:
+        await update_group(message, yandex_token=token)
+    else:
+        await update_user(message, yandex_token=token)
+    print('-'*35)
+    
+    xxx = await bot.get_chat_member(chat_id=message.chat.id,
+                                    user_id=55924337)
+    print(f' chat_admin {xxx.is_chat_admin()}')
+    op = await bot.get_chat_administrators(chat_id=message.chat.id)
+    print(f'count = {len(op)}')
+    for i in op:
+        print(f'-----{i}')
+  
+    await message.delete()
+    await message.answer(text)
+
+
+
+@dp.message_handler(commands='yandex')
+async def yandex_turn_on(message: types.Message, state: FSMContext):
+    await state.reset_state(with_data=False)
+    yandex = message.get_args()
+    if not yandex:
+        yandex = 'on'
+    yandex = check_args_bool(yandex)
+    if message.chat.id < 0:
+        update_group(message, yandex_on=yandex)
+    else:
+        update_user(message, yandex_on=yandex)
+    if yandex:
+        text = _('Downloading to Yandex.disk was turned on')
+    else:
+        text = _('Downloading to Yandex.disk was turned off')
+    await message.reply(text)
+
+
+@dp.message_handler(commands='save_to_yandex_disk')
+async def switch_yadisk_mode(message: types.Message, state: FSMContext):
+    await state.reset_state(with_data=False)
+    only_save = message.get_args()
+    if not only_save:
+        await message.reply(_('No arguments! Should be /save_to_yandex_disk 1/0/on/off'))
+        return
+    only_save = check_args_bool(only_save)
+    if only_save is None:
+        await message.reply(_('Bad arguments! Should be /save_to_yandex_disk 1/0/on/off'))
+        return
+    if message.chat.id < 0:
+        update_group(message, yandex_only_save=only_save)
+    else:
+        update_user(message, yandex_only_save=only_save)
+    if only_save:
+        text = _('Images will be only save to Yandex.disk')
+    else:
+        text = _('Images will be with tags and save to Yandex.disk')
+    await message.reply(text)
+
+
+@dp.message_handler(group_chat, commands=['sort', 'save'], state='*')
+async def sort_(message: types.Message, state: FSMContext):
+    await state.reset_state(with_data=False)
+    await message.reply(_('Please, reply this message with image'))
+
+
+@dp.message_handler(private_chat, content_types=['text'], state='*')
 async def echo(message: types.Message, state):
     await get_or_create_user_in_db(message)
     await message.answer(_("Don't understand you!"))

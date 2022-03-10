@@ -2,17 +2,20 @@
 from aiogram import types
 from aiogram.contrib.middlewares.i18n import I18nMiddleware
 
-from queiries import get_user_from_db
+from queiries import get_user_from_db, get_group_from_db
 
 # from config import I18N_DOMAIN, LOCALES_DIR, default_lang
 from config import settings
 
 
-async def get_lang(user_id):
+async def get_lang(item_id):
     """Get lang from DB."""
-    user = await get_user_from_db(user_id)
-    if user:
-        return user.lang
+    if item_id > 0:
+        item = await get_user_from_db(item_id)
+    else:
+        item = await get_group_from_db(item_id)
+    if item:
+        return item.lang
 
 
 class ACLMiddleware(I18nMiddleware):
@@ -21,7 +24,10 @@ class ACLMiddleware(I18nMiddleware):
     async def get_user_locale(self, action, args):
         """Get locale."""
         user = types.User.get_current()
-        return await get_lang(user.id) or user.locale or settings.default_lang
+        chat = types.Chat.get_current()
+        if not chat or not user:
+            return settings.default_lang
+        return await get_lang(chat.id) or user.locale or settings.default_lang
 
 
 def setup_middleware(dp):
