@@ -1,12 +1,14 @@
 """DB models."""
+import os
+
 import asyncio
 import enum
 from datetime import datetime
 
-from sqlalchemy import (Boolean, Column, DateTime, Integer, String,
-                        create_engine, MetaData)
+from sqlalchemy import (Boolean, Column, DateTime, Integer, String, BIGINT,
+                       MetaData)
 from sqlalchemy.dialects.postgresql import ENUM
-from sqlalchemy.ext.asyncio import (AsyncSession, async_scoped_session,
+from sqlalchemy.ext.asyncio import (AsyncSession,
                                     create_async_engine)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -17,7 +19,9 @@ from config import settings
 
 # engine = create_engine(settings.SQLALCHEMY_URI)
 
-engine = create_async_engine(settings.SQLALCHEMY_URI)
+
+# engine = create_async_engine(settings.SQLALCHEMY_URI)
+engine = create_async_engine(os.environ.get('SQLALCHEMY_URI'))
 async_session = sessionmaker(bind=engine,  expire_on_commit=False, class_=AsyncSession)
 # async_session = sessionmaker(bind=engine,  expire_on_commit=True, class_=AsyncSession)
 

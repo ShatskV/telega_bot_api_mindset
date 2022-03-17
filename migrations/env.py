@@ -25,8 +25,9 @@ config.set_main_option('sqlalchemy.url', SQLALCHEMY_URI)
 fileConfig(config.config_file_name)
 
 target_metadata = Base.metadata
+print(target_metadata.schema)
 
-engine = create_engine(os.environ.get('SQLALCHEMY_URI'))
+engine = create_engine(SQLALCHEMY_URI)
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
@@ -82,7 +83,11 @@ def run_migrations_online():
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection,
+            target_metadata=target_metadata,
+            version_table_schema=target_metadata.schema,
+            include_schemas=True,
+            include_object=include_object
         )
 
         with context.begin_transaction():
