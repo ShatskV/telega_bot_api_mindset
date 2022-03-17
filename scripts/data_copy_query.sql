@@ -17,7 +17,7 @@ INSERT INTO bot.tg_actions (
 SELECT 
     id,
     tg_user_id,
-    CONVERT(bot.action, action_type),
+    action_type::action::text::bot.action,
     image_uuid,
     image_name,
     lang,
@@ -69,7 +69,7 @@ SELECT
     first_name,
     last_name,
     lang,
-    tags_format,
+    tags_format::tagformat::text::bot.tagformat,
     rating,
     free_act,
     create_at,
