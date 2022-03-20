@@ -14,5 +14,4 @@ pybabel compile -d locales -D picpackbot
 1. Вытаскиваем тексты из файлов, Добавляем текст в переведенные версии
 pybabel extract . -o locales/picpackbot.pot
 pybabel update -d locales -D picpackbot -i locales/picpackbot.pot
-3. Вручную делаем переводы, а потом Собираем
-pybabel compile -d locales -D picpackbot
+3. Вручную делаем переводы, они при старте бота соберуться сами

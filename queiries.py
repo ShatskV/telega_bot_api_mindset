@@ -10,7 +10,7 @@ from db import TgGroup, TgUser, CallbackQuery, async_session
 
 from config import settings
 
-from sqlalchemy import true, update
+from sqlalchemy import update
 from sqlalchemy.exc import NoResultFound, SQLAlchemyError
 from sqlalchemy.future import select
 

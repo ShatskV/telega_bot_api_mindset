@@ -5,9 +5,10 @@ import os
 
 from aiogram import filters, types
 from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters import ChatTypeFilter
+from aiogram.dispatcher.filters import ChatTypeFilter, AdminFilter
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.utils.exceptions import MessageCantBeDeleted
 
 from bot_init import _, bot, dp
 from config import settings
@@ -176,6 +177,8 @@ async def get_desc_and_tags_image(message: types.Message, state: FSMContext):
     ya_token = user.yandex_token
     yandex_answer = None
     if user.yandex_on and ya_token:
+        if user.yandex_only_save:
+            result['tags'] = None
         tag_folder, uuid = make_tag_folder_for_yandex(result)
         upload_success = await yandex_upload(tag=tag_folder,
                                              uuid=uuid,
@@ -191,11 +194,10 @@ async def get_desc_and_tags_image(message: types.Message, state: FSMContext):
     for item in answer:
         last_msg = await message.answer(item)
     if not ya_token and user.yandex_on:
-        await message.reply(_('No token for Yandex.disk! Please, recieve token:\n{url}\nAnd add with '
-                              .format(url=settings.YADISK_AUTH_URL) + 'command /yadisk_token RECIEVED_TOKEN'))
-        return
+        await message.reply(_('No token for Yandex.disk! Please, recieve token: <a href="{url}">Token</a>\n'
+                              'And add with command /yandex_token YOUR_TOKEN').format(url=settings.YADISK_AUTH_URL))
     if yandex_answer:
-        await message.reply(yandex_answer)
+        await message.answer(yandex_answer)
     if user.rating:
         msg_id = last_msg.message_id + 1
         await state.update_data(msg_id=msg_id)
@@ -223,7 +225,8 @@ async def rating_off(message: types.Message, state: FSMContext):
         await message.answer(_('Rating was turned {}').format(rating))
 
 
-@dp.message_handler(commands='lang', state='*')
+@dp.message_handler(group_chat, AdminFilter(), commands='lang')
+@dp.message_handler(private_chat, commands='lang', state='*')
 async def change_lang(message: types.Message, state: FSMContext):
     new_lang = message.get_args()
     await state.reset_state(with_data=False)
@@ -237,9 +240,9 @@ async def change_lang(message: types.Message, state: FSMContext):
         return
     if new_lang in settings.langs:
         if message.chat.id < 0:
-            await update_user(message, lang=new_lang)
-        else:
             await update_group(message, lang=new_lang)
+        else:
+            await update_user(message, lang=new_lang)
         await message.answer(_('Language was change to English!', locale=new_lang))
     else:
         await message.answer(_('Language not supported or wrong format!'))
@@ -266,33 +269,61 @@ async def tags_format(message: types.Message, state: FSMContext):
         await message.answer(_('Wrong tags format!'))
 
 
-@dp.message_handler(private_chat, commands=['start', 'help'], state='*')
+@dp.message_handler(commands=['start', 'help'], state='*')
 async def send_welcome(message: types.Message):
     await get_or_create_user_in_db(message)
     langs = ', '.join(settings.langs)
-    text = _('<b>Picpack Bot</b>\n'
-             'Bot generates description and list of tags for any image. Just send a picture\n'
-             'Also it supports link to picture\n'
-             'Visite ower site: http://app.picpack.io/demo_en\n'
-             'Chat with owner: @FrankShikhaliev\n'
-             'Below is a list of available commands, also they could have arguments (in brackets):\n'
-             '/lang - change language ({})\n'
-             '/tags - change format tags (list, instagram)\n'
-             '/rating - rate result on/off (1, 0, on, off)\n'
-             '/feedback - leave feedback about our bot').format(langs)
+    if message.chat.id > 0:
+        text = _('<b>Picpack Bot</b>\n'
+                 '<b><i>Description:</i></b>\n'
+                 'Bot generates description and list of tags for any image. Just send a picture\n'
+                 'And it supports link to image\n'
+                 'Also bot support saving pictures to your Yandex.disk\n'
+                 'In group bot only saves images to Yandex.disk with sorting by tags\n'
+                 'This is private mode!\n'
+                 'Visit ower site: http://app.picpack.io/demo_en\n'
+                 'Chat with owner: @FrankShikhaliev\n'
+                 'Below is a list of available commands, also they could have arguments (in brackets):\n'
+                 '/lang - change language ({langs})\n'
+                 '/tags - change format tags (list, instagram)\n'
+                 '/rating - rate result on/off (1, 0, on, off)\n'
+                 '/feedback - leave feedback about our bot\n'
+                 '\n'
+                 '<b><i>Yandex.disk:</i></b>\n'
+                 '/yandex - saving images to Yandex.Disk turn on/off (1, 0, on, off)\n'
+                 '/only_save_to_yandex - saving images without tags to Yandex.Disk turn on/off (1, 0, on, off)\n'
+                 '/yandex_token YOUR_TOKEN - change Yandex.disk token\n'
+                 'Get token: <a href="{url}">Token</a>').format(langs=langs, url=settings.YADISK_AUTH_URL)
+    else:
+        text = _('<b>Picpack Bot</b>\n'
+                 '<b><i>Description:</i></b>\n'
+                 'Bot sorts images in group by tag and saves them to Yandex.disk to tag folder\n'
+                 'Please recieve Yandex.disk token:  <a href="{url}">Token</a>\n'
+                 'And save it with command /yandex_token YOUR_TOKEN\n'
+                 'In private chat bot Bot generates description and list of tags for any image.\n'
+                 'This is group mode!\n'
+                 'Visit ower site: http://app.picpack.io/demo_en\n'
+                 'Chat with owner: @FrankShikhaliev\n'
+                 'Below is a list of available commands, also they could have arguments (in brackets):\n'
+                 '/lang - change language ({langs})\n'
+                 '/yandex - saving images to Yandex.Disk turn on/off (1, 0, on, off)\n'
+                 '/only_save_to_yandex - saving images without tags to Yandex.Disk turn on/off (1, 0, on, off)\n'
+                 '/yandex_token YOUR_TOKEN - change Yandex.disk token\n'
+                 '/sort, /save - sort or save pictures when privacy mode is on\n').format(langs=langs,
+                                                                                          url=settings.YADISK_AUTH_URL)
     await message.answer(text)
 
 
-async def check_edit_keyboard_message(msg: types.Message, state: FSMContext):
-    current_state = await state.get_state()
-    if current_state:
-        async with state.proxy() as data:
-            if data.get('inline'):
-                await bot.edit_message_text(chat_id=msg.from_user.id,
-                                            message_id=msg.message_id-1,
-                                            text=_('No action selected!'),
-                                            reply_markup=None)
-    await state.finish()
+# async def check_edit_keyboard_message(msg: types.Message, state: FSMContext):
+#     current_state = await state.get_state()
+#     if current_state:
+#         async with state.proxy() as data:
+#             if data.get('inline'):
+#                 await bot.edit_message_text(chat_id=msg.from_user.id,
+#                                             message_id=msg.message_id-1,
+#                                             text=_('No action selected!'),
+#                                             reply_markup=None)
+#     await state.finish()
 
 
 @dp.message_handler(private_chat, lambda message: message.text, state=Feedback.leave)
@@ -315,8 +346,8 @@ async def leave_feedback(message: types.Message, state: FSMContext):
 async def group_yandex(message: types.Message):
     group = await get_or_create_group_in_db(message)
     if not group.yandex_token:
-        await message.reply(_('No token for Yandex.disk! Please, recieve token:{url}')
-                            .format(url=settings.YADISK_AUTH_URL))
+        await message.reply(_('No token for Yandex.disk! Please, recieve token: <a href="{url}">Token</a>\n'
+                              'And add with command /yandex_token YOUR_TOKEN').format(url=settings.YADISK_AUTH_URL))
         return
     filename, is_url = await form_file_path_url(message)
     if not group.yandex_only_save:
@@ -325,13 +356,13 @@ async def group_yandex(message: types.Message):
                                       url_method=is_url,
                                       exc_true=False)
     else:
-        result = ''
+        result = {}
     tag_folder, uuid = make_tag_folder_for_yandex(result)
     upload_success = await yandex_upload(tag=tag_folder,
                                          uuid=uuid,
                                          filename=filename,
                                          token=group.yandex_token)
-    answer = await check_answer_yandex(upload_success)
+    answer = check_answer_yandex(upload_success)
     if answer:
         await message.reply(answer)
     # if upload_success == 'bad_token':
@@ -339,18 +370,6 @@ async def group_yandex(message: types.Message):
     #     return
     # if not upload_success:
     #     await message.answer(_('Error while uploading to Yandex.disk!'))
-    # await message.answer(f'upload: {upload_success}')
-
-
-# @dp.message_handler(ChatTypeFilter(chat_type=['group', 'supergroup', 'private']), commands='hop')
-# async def get_commands(message: types.Message):
-#     print(message)
-#     await message.answer(message)
-
-
-@dp.message_handler(group_chat, commands='start', state='*')
-async def get_commands(message: types.Message):
-    await message.answer('start!')
 
 
 @dp.message_handler(private_chat, lambda message: 'video/' in message.document.mime_type, content_types='document',
@@ -367,16 +386,18 @@ async def file_unsupport(message: types.Message, state: FSMContext):
     await message.answer(_("Sorry, bot doesn't support this file format!"))
 
 
-@dp.message_handler(commands='yadisk_token')
+@dp.message_handler(private_chat, commands='yandex_token')
+@dp.message_handler(group_chat, AdminFilter(), commands='yandex_token')
 async def set_yadisk_token(message: types.Message, state: FSMContext):
     await state.reset_state(with_data=False)
     token = message.get_args()
     if not token:
-        await message.reply(_('Token is missing! Should be /yadisk_token YOUR_TOKEN'))
+        await message.reply(_('Token is missing! Should be /yandex_token YOUR_TOKEN'))
         return
     check_token = await yandex_check(token)
     if not check_token and check_token is not None:
-        await message.reply(_('Token is invalid! Please get new one!'))
+        await message.reply(_('Token is invalid! Please, get new one: <a href="{url}">Token</a>'
+                              .format(url=settings.YADISK_AUTH_URL)))
         return
     if check_token is None:
         text = _('Token was changed, but not verified')
@@ -386,22 +407,15 @@ async def set_yadisk_token(message: types.Message, state: FSMContext):
         await update_group(message, yandex_token=token)
     else:
         await update_user(message, yandex_token=token)
-    print('-'*35)
-    
-    xxx = await bot.get_chat_member(chat_id=message.chat.id,
-                                    user_id=55924337)
-    print(f' chat_admin {xxx.is_chat_admin()}')
-    op = await bot.get_chat_administrators(chat_id=message.chat.id)
-    print(f'count = {len(op)}')
-    for i in op:
-        print(f'-----{i}')
-  
-    await message.delete()
+    try:
+        await message.delete()
+    except MessageCantBeDeleted:
+        logging.error(f'Message cant be delete, id = {message.message_id}, maybe need amdin rights!')
     await message.answer(text)
 
 
-
-@dp.message_handler(commands='yandex')
+@dp.message_handler(private_chat, commands='yandex')
+@dp.message_handler(group_chat, AdminFilter(), commands='yandex')
 async def yandex_turn_on(message: types.Message, state: FSMContext):
     await state.reset_state(with_data=False)
     yandex = message.get_args()
@@ -409,31 +423,41 @@ async def yandex_turn_on(message: types.Message, state: FSMContext):
         yandex = 'on'
     yandex = check_args_bool(yandex)
     if message.chat.id < 0:
-        update_group(message, yandex_on=yandex)
+        await update_group(message, yandex_on=yandex)
+        item = await get_or_create_group_in_db(message)
     else:
-        update_user(message, yandex_on=yandex)
+        await update_user(message, yandex_on=yandex)
+        item = await get_or_create_user_in_db(message)
     if yandex:
-        text = _('Downloading to Yandex.disk was turned on')
+        if not item.yandex_token:
+            text = _('Downloading to Yandex.disk was turned on.\n'
+                     'But you should recieve Yandex token: <a href="{url}">Token</a>\n'
+                     'Then add token with command /yandex_token YOUR_TOKEN'
+                     .format(url=settings.YADISK_AUTH_URL))
+        else:
+            text = _('Downloading to Yandex.disk was turned on')
     else:
         text = _('Downloading to Yandex.disk was turned off')
     await message.reply(text)
 
 
-@dp.message_handler(commands='save_to_yandex_disk')
+@dp.message_handler(private_chat, commands='only_save_to_yandex')
+@dp.message_handler(group_chat, AdminFilter(), commands='only_save_to_yandex')
 async def switch_yadisk_mode(message: types.Message, state: FSMContext):
     await state.reset_state(with_data=False)
     only_save = message.get_args()
     if not only_save:
-        await message.reply(_('No arguments! Should be /save_to_yandex_disk 1/0/on/off'))
-        return
+        only_save = '1'
+        # await message.reply(_('No arguments! Should be /only_save_to_yandex 1/0/on/off'))
+        # return
     only_save = check_args_bool(only_save)
     if only_save is None:
-        await message.reply(_('Bad arguments! Should be /save_to_yandex_disk 1/0/on/off'))
+        await message.reply(_('Bad arguments! Should be /only_save_to_yandex 1/0/on/off'))
         return
     if message.chat.id < 0:
-        update_group(message, yandex_only_save=only_save)
+        await update_group(message, yandex_only_save=only_save)
     else:
-        update_user(message, yandex_only_save=only_save)
+        await update_user(message, yandex_only_save=only_save)
     if only_save:
         text = _('Images will be only save to Yandex.disk')
     else:

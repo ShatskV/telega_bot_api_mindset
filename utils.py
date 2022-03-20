@@ -2,14 +2,13 @@
 import logging
 import os
 import shutil
-import uuid
-from aiogram import types
+import uuid as uuid_lib
 
 import aiohttp
+from aiogram import types
 from aiohttp.client_exceptions import ClientError
 
 from bot_init import _
-
 from config import settings
 
 
@@ -65,7 +64,7 @@ async def async_get_request(url, exc_true=True, **payload):
 def make_tag_folder_for_yandex(result):
     tag_folder = 'undefined'
     if result.get('error') or not result.get('image_uuid'):
-        uuid = uuid.uuid4()
+        uuid = uuid_lib.uuid4()
         return tag_folder, uuid
     uuid = result['image_uuid']
     tags = result.get('tags')
@@ -96,7 +95,7 @@ def make_desc_tags_answer(result, tags_format):
         answer.append(_('Service unavailable!'))
     answer.append(_('<b>Tags:</b>'))
     tags = result.get('tags')
-    if tags and len(tags) and (type(tags) == list) > 0:
+    if tags and len(tags) > 0 and (type(tags) == list):
         i = 0
         answer_tags = ''
         num_tags = len(tags)
@@ -118,13 +117,13 @@ def make_desc_tags_answer(result, tags_format):
                     break
             answer_tags += ' '
         answer.append(answer_tags)
-    elif len(tags) == 0:
+    elif tags is not None and len(tags) == 0:
         answer.append(_('Sorry, tags not found!'))
     else:
-        if tags != list:
-            answer.append(tags)
-        else:
-            answer.append(_('Service unavailable!'))
+        # if tags != list:
+        #     answer.append(tags)
+        # else:
+        answer.append(_('Service unavailable!'))
     return answer, result.get('image_uuid')
 
 
@@ -143,9 +142,10 @@ async def form_file_path_url(msg: types.Message):
     return file_name, False
 
 
-async def check_answer_yandex(upload_success):
+def check_answer_yandex(upload_success):
     if upload_success == 'bad_token':
-        return _('Bad Yandex.disk token!')
+        return (_('Bad Yandex.disk token! Please, recieve new one: <a href="{url}">Token</a>')
+                .format(url=settings.YADISK_AUTH_URL))
     if not upload_success:
         return _('Error while uploading to Yandex.disk!')
     return None
