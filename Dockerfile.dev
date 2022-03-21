@@ -3,7 +3,7 @@ FROM python:3.9
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 ENV APP_SETTINGS=dev
-WORKDIR /telegrambot_mindset
+WORKDIR /pp_telegram_bot
 
 RUN apt-get update
 

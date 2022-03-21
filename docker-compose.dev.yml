@@ -16,10 +16,8 @@ services:
     container_name: telegram_bot_dev
     hostname: telegram_bot_dev
     restart: always
-    depends_on:
-      - db_dev
     volumes:
-      - .:/telegrambot_mindset_dev
+      - .:/pp_telegram_bot
     networks:
       - iu_app_backend_dev
       - net_public_nginx
