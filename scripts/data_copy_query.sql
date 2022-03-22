@@ -1,4 +1,4 @@
-INSERT INTO bot."RatingQuery" (message_id, image_uuid)
+INSERT INTO bot.rating_query (message_id, image_uuid)
 SELECT message_id, image_uuid
 FROM public."RatingQuery";
 
@@ -77,7 +77,7 @@ SELECT
     is_banned
 FROM public.tg_users;
 
-SELECT setval('bot."RatingQuery_message_id_seq"', (SELECT last_value FROM public."RatingQuery_message_id_seq"), true);
+SELECT setval('bot.rating_query_message_id_seq', (SELECT last_value FROM public."RatingQuery_message_id_seq"), true);
 
 SELECT setval('bot.tg_actions_id_seq', (SELECT last_value FROM public.tg_actions_id_seq), true);
 
