@@ -17,7 +17,7 @@ services:
     hostname: telegram_bot_dev
     restart: always
     volumes:
-      - .:/telegrambot_mindset_dev
+      - .:/pp_telegram_bot
     networks:
       - iu_app_backend_dev
       - net_public_nginx

@@ -1,33 +1,48 @@
+import os
+
 from logging.config import fileConfig
-
-import os, sys
-sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), '..')))
-from db import Base
-
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
 
 from alembic import context
 
+from dotenv import load_dotenv
+
+import sqlalchemy
+from sqlalchemy import create_engine, engine_from_config, pool
+
+from db import *
+
+load_dotenv()
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
+
 config = context.config
+SQLALCHEMY_URI = os.environ.get('SQLALCHEMY_URI').replace('+asyncpg', '')
+config.set_main_option('sqlalchemy.url', SQLALCHEMY_URI)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 fileConfig(config.config_file_name)
 
-# add your model's MetaData object here
-# for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
 target_metadata = Base.metadata
+print(target_metadata.schema)
 
+engine = create_engine(SQLALCHEMY_URI)
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
+def create_database_schema_if_not_exists(engine, schema):
+    if not engine.dialect.has_schema(engine, schema):
+        engine.execute(sqlalchemy.schema.CreateSchema(schema))
+
+
+def include_object(object, name, type_, reflected, compare_to):
+    if type_ == "table" and object.schema != target_metadata.schema:
+        return False
+    else:
+        return True
 
 def run_migrations_offline():
     """Run migrations in 'offline' mode.
@@ -68,7 +83,11 @@ def run_migrations_online():
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection,
+            target_metadata=target_metadata,
+            version_table_schema=target_metadata.schema,
+            include_schemas=True,
+            include_object=include_object
         )
 
         with context.begin_transaction():
@@ -78,4 +97,7 @@ def run_migrations_online():
 if context.is_offline_mode():
     run_migrations_offline()
 else:
+    print('Start creating schemas') 
+    create_database_schema_if_not_exists(engine, target_metadata.schema)
+    print('Start running migrations')
     run_migrations_online()
