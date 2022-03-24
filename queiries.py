@@ -26,7 +26,7 @@ async def get_or_create_user_in_db(msg: Message):
         user = TgUser(tg_user_id=tg_user_id,
                       tg_user_name=getattr(msg.from_user, 'username', None),
                       first_name=getattr(msg.from_user, 'first_name', None),
-                      last_name=getattr(msg.from_user, 'username', None),
+                      last_name=getattr(msg.from_user, 'last_name', None),
                       lang=lang)
         await add_object_to_db(user)
         # if not add_success:
