@@ -4,7 +4,6 @@ from aiogram.contrib.middlewares.i18n import I18nMiddleware
 
 from queiries import get_user_from_db, get_group_from_db
 
-# from config import I18N_DOMAIN, LOCALES_DIR, default_lang
 from config import settings
 
 

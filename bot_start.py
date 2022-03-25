@@ -2,11 +2,9 @@
 import os
 from aiogram import executor
 from bot_init import  on_shutdown, on_startup
-# from settings import (WEBHOOK_PATH, WEBAPP_HOST, WEBAPP_PORT)
 from config import settings
 
 from aiogram.utils.executor import start_webhook
-# from dotenv import load_dotenv
 
 
 if __name__ == '__main__':

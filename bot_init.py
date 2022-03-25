@@ -12,24 +12,12 @@ from lang_middleware import setup_middleware
 
 with warnings.catch_warnings():
     warnings.filterwarnings('ignore', category=DeprecationWarning)
-# from settings import WEBHOOK_URL
 from config import settings
-# webhook settings
-# WEBHOOK_HOST = 'https://bot.picpack.com'
-# WEBHOOK_PATH = ''
-# WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
-
-# # webserver settings
-# WEBAPP_HOST = 'localhost'  # or ip
-# WEBAPP_PORT = 3001
-
 
 storage = MemoryStorage()
 load_dotenv()
-# API_TOKEN = os.environ.get('API_TOKEN')
 logging.basicConfig(format=u'%(filename)s [LINE:%(lineno)d] #%(levelname)-8s [%(asctime)s]  %(message)s',
                     level=settings.LOG_LEVEL)
-# logging.basicConfig(level=logging.INFO)
 
 bot = Bot(token=settings.API_TOKEN, parse_mode='HTML')
 dp = Dispatcher(bot, storage=storage)

@@ -448,8 +448,6 @@ async def switch_yadisk_mode(message: types.Message, state: FSMContext):
     only_save = message.get_args()
     if not only_save:
         only_save = '1'
-        # await message.reply(_('No arguments! Should be /only_save_to_yandex 1/0/on/off'))
-        # return
     only_save = check_args_bool(only_save)
     if only_save is None:
         await message.reply(_('Bad arguments! Should be /only_save_to_yandex 1/0/on/off'))
