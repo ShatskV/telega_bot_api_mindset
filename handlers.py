@@ -1,24 +1,24 @@
 """Bot's handlers."""
-from distutils.command import check
 import logging
 import os
 
-from aiogram import filters, types
+from aiogram import types
 from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters import ChatTypeFilter, AdminFilter
+from aiogram.dispatcher.filters import AdminFilter, ChatTypeFilter
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.exceptions import MessageCantBeDeleted
 
+from api_requests import async_get_desc, async_set_rating
 from bot_init import _, bot, dp
 from config import settings
 from db import TagFormat
 from queiries import (add_rating_query, get_or_create_group_in_db,
                       get_or_create_user_in_db, get_uuid_from_db_query,
                       update_group, update_user)
-from utils import (async_get_desc, async_set_rating, check_answer_yandex, check_args_bool,
-                   form_file_path_url, make_desc_tags_answer,
-                   make_tag_folder_for_yandex, silentremove)
+from utils import (check_answer_yandex, check_args_bool, form_file_path_url,
+                   make_desc_tags_answer, make_tag_folder_for_yandex,
+                   silentremove)
 from yandex_disk import yandex_check, yandex_upload
 
 
@@ -98,7 +98,7 @@ private_chat = ChatTypeFilter(chat_type=types.ChatType.PRIVATE)
 
 
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('rating'), state='*')
-async def process_callback_rating(callback_query: types.CallbackQuery, state: FSMContext):
+async def process_callback_rating_on(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
     rating = callback_query.data[-1:]
     rating = int(rating)
@@ -115,7 +115,7 @@ async def process_callback_rating(callback_query: types.CallbackQuery, state: FS
 
 
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('lang'), state='*')
-async def process_callback_rating(callback_query: types.CallbackQuery, state: FSMContext):
+async def process_callback_lang(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
     new_lang = callback_query.data[-2:]
     await update_user(callback_query, lang=new_lang)
@@ -126,7 +126,7 @@ async def process_callback_rating(callback_query: types.CallbackQuery, state: FS
 
 
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('tags'), state='*')
-async def process_callback_rating(callback_query: types.CallbackQuery, state: FSMContext):
+async def process_callback_tagformat(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
     tags_fmt = callback_query.data[5:]
     tags_format = getattr(TagFormat, tags_fmt)
@@ -147,16 +147,15 @@ async def process_callback_rating(callback_query: types.CallbackQuery, state: FS
         uuid = data.get('uuid')
         msg_id = data.get('msg_id')
     if msg_id == call_msg_id:
-        await state.reset_data()
+        await state.reset_state()
         if not uuid:
             uuid = await get_uuid_from_db_query(msg_id=msg_id)
     else:
         uuid = await get_uuid_from_db_query(msg_id=call_msg_id)
     if uuid:
-        await async_set_rating(uuid=uuid, rating=rating)
+        await async_set_rating(uuid=uuid, rating=rating, msg=callback_query)
     else:
         logging.error('No uuid for rating!')
-
     await bot.edit_message_text(chat_id=callback_query.from_user.id,
                                 message_id=call_msg_id,
                                 text=_('Thank you for rating!'))
@@ -172,7 +171,8 @@ async def get_desc_and_tags_image(message: types.Message, state: FSMContext):
 
     result = await async_get_desc(path_url=filename,
                                   lang=user.lang,
-                                  url_method=is_url)
+                                  url_method=is_url,
+                                  msg=message)
     answer, uuid = make_desc_tags_answer(result=result, tags_format=user.tags_format.value)
     ya_token = user.yandex_token
     yandex_answer = None
@@ -183,7 +183,8 @@ async def get_desc_and_tags_image(message: types.Message, state: FSMContext):
         upload_success = await yandex_upload(tag=tag_folder,
                                              uuid=uuid,
                                              filename=filename,
-                                             token=user.yandex_token)
+                                             token=user.yandex_token,
+                                             message=message)
         yandex_answer = check_answer_yandex(upload_success)
     # async with state.proxy() as data:
     #     data['uuid'] = uuid
@@ -195,21 +196,22 @@ async def get_desc_and_tags_image(message: types.Message, state: FSMContext):
         last_msg = await message.answer(item)
     if not ya_token and user.yandex_on:
         await message.reply(_('No token for Yandex.disk! Please, recieve token: <a href="{url}">Token</a>\n'
-                              'And add with command /yandex_token YOUR_TOKEN').format(url=settings.YADISK_AUTH_URL))
+                            'And add with command /yandex_token YOUR_TOKEN').format(url=settings.YADISK_AUTH_URL))
     if yandex_answer:
         await message.answer(yandex_answer)
     if user.rating:
         msg_id = last_msg.message_id + 1
         await state.update_data(msg_id=msg_id)
         await add_rating_query(msg_id=msg_id, uuid=uuid)
-        await message.reply(_('Please, rate the result!'), reply_markup=inline_kb_rat)
+        # await message.reply(_('Please, rate the result!'), reply_markup=inline_kb_rat)
+        await message.reply(text=_('Please, rate the result!'),
+                            reply_markup=inline_kb_rat)
 
 
 @dp.message_handler(private_chat, commands='rating', state='*')
 async def rating_off(message: types.Message, state: FSMContext):
     rating = message.get_args()
     await state.reset_state(with_data=False)
-
     if not rating:
         # await ChangeRateSet.choose.set()
         await message.answer(_('Choose rating setting:'), reply_markup=get_rate_kb())
@@ -270,8 +272,10 @@ async def tags_format(message: types.Message, state: FSMContext):
 
 
 @dp.message_handler(commands=['start', 'help'], state='*')
-async def send_welcome(message: types.Message):
+async def send_welcome(message: types.Message, state: FSMContext):
     await get_or_create_user_in_db(message)
+    await state.reset_state(with_data=False)
+
     langs = ', '.join(settings.langs)
     if message.chat.id > 0:
         text = _('<b>Picpack Bot</b>\n'
@@ -290,10 +294,11 @@ async def send_welcome(message: types.Message):
                  '/feedback - leave feedback about our bot\n'
                  '\n'
                  '<b><i>Yandex.disk:</i></b>\n'
+                 '/yandex_token YOUR_TOKEN - change Yandex.disk token\n'
+                 'Get token: <a href="{url}">Token</a>'
                  '/yandex - saving images to Yandex.Disk turn on/off (1, 0, on, off)\n'
                  '/only_save_to_yandex - saving images without tags to Yandex.Disk turn on/off (1, 0, on, off)\n'
-                 '/yandex_token YOUR_TOKEN - change Yandex.disk token\n'
-                 'Get token: <a href="{url}">Token</a>').format(langs=langs, url=settings.YADISK_AUTH_URL)
+                 ).format(langs=langs, url=settings.YADISK_AUTH_URL)
     else:
         text = _('<b>Picpack Bot</b>\n'
                  '<b><i>Description:</i></b>\n'
@@ -341,27 +346,29 @@ async def leave_feedback(message: types.Message, state: FSMContext):
 
 
 @dp.message_handler(group_chat, lambda message: 'image/' in message.document.mime_type,
-                    content_types='document', state='*')
-@dp.message_handler(group_chat, content_types=['photo'], state='*')
-async def group_yandex(message: types.Message):
+                    content_types='document')
+@dp.message_handler(group_chat, content_types=['photo'])
+async def group_yandex(message: types.Message, state: FSMContext):
     group = await get_or_create_group_in_db(message)
     if not group.yandex_token:
         await message.reply(_('No token for Yandex.disk! Please, recieve token: <a href="{url}">Token</a>\n'
-                              'And add with command /yandex_token YOUR_TOKEN').format(url=settings.YADISK_AUTH_URL))
+                            'And add with command /yandex_token YOUR_TOKEN').format(url=settings.YADISK_AUTH_URL))
         return
     filename, is_url = await form_file_path_url(message)
     if not group.yandex_only_save:
         result = await async_get_desc(path_url=filename,
                                       lang=settings.YADISK_TAG_LANG,
                                       url_method=is_url,
-                                      exc_true=False)
+                                      exc_true=False,
+                                      msg=message)
     else:
         result = {}
     tag_folder, uuid = make_tag_folder_for_yandex(result)
     upload_success = await yandex_upload(tag=tag_folder,
                                          uuid=uuid,
                                          filename=filename,
-                                         token=group.yandex_token)
+                                         token=group.yandex_token,
+                                         message=message)
     answer = check_answer_yandex(upload_success)
     if answer:
         await message.reply(answer)
@@ -374,10 +381,10 @@ async def group_yandex(message: types.Message):
 
 @dp.message_handler(private_chat, lambda message: 'video/' in message.document.mime_type, content_types='document',
                     state='*')
-@dp.message_handler(private_chat, content_types=['video'], state='*')
+@dp.message_handler(private_chat, content_types=['video', 'animation'], state='*')
 async def video_unsupport(message: types.Message, state: FSMContext):
     await state.reset_state(with_data=False)
-    await message.answer(_("Sorry, bot doesn't support videos!"))
+    await message.answer(_("Sorry, bot doesn't support videos and animations!"))
 
 
 @dp.message_handler(private_chat, content_types='document', state='*')
@@ -394,10 +401,10 @@ async def set_yadisk_token(message: types.Message, state: FSMContext):
     if not token:
         await message.reply(_('Token is missing! Should be /yandex_token YOUR_TOKEN'))
         return
-    check_token = await yandex_check(token)
+    check_token = await yandex_check(token, message)
     if not check_token and check_token is not None:
         await message.reply(_('Token is invalid! Please, get new one: <a href="{url}">Token</a>'
-                              .format(url=settings.YADISK_AUTH_URL)))
+                            .format(url=settings.YADISK_AUTH_URL)))
         return
     if check_token is None:
         text = _('Token was changed, but not verified')
@@ -408,7 +415,7 @@ async def set_yadisk_token(message: types.Message, state: FSMContext):
     else:
         await update_user(message, yandex_token=token)
     try:
-        await message.delete()
+        await message.delete()  # # ПОМЕНЯТЬ
     except MessageCantBeDeleted:
         logging.error(f'Message cant be delete, id = {message.message_id}, maybe need amdin rights!')
     await message.answer(text)
@@ -471,5 +478,6 @@ async def sort_(message: types.Message, state: FSMContext):
 
 @dp.message_handler(private_chat, content_types=['text'], state='*')
 async def echo(message: types.Message, state):
+    # await message.answer(message)
     await get_or_create_user_in_db(message)
     await message.answer(_("Don't understand you!"))

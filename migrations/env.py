@@ -62,6 +62,7 @@ def run_migrations_offline():
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        compare_type=True,
     )
 
     with context.begin_transaction():
@@ -87,7 +88,8 @@ def run_migrations_online():
             target_metadata=target_metadata,
             version_table_schema=target_metadata.schema,
             include_schemas=True,
-            include_object=include_object
+            include_object=include_object,
+            compare_type=True,
         )
 
         with context.begin_transaction():
@@ -97,7 +99,7 @@ def run_migrations_online():
 if context.is_offline_mode():
     run_migrations_offline()
 else:
-    print('Start creating schemas') 
+    print('Start creating schemas')
     create_database_schema_if_not_exists(engine, target_metadata.schema)
     print('Start running migrations')
     run_migrations_online()

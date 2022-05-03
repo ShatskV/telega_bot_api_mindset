@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-03-20 19:31+0300\n"
+"POT-Creation-Date: 2022-05-03 20:31+0300\n"
 "PO-Revision-Date: 2022-01-30 19:09+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ru\n"
@@ -43,11 +43,11 @@ msgstr "Вкл."
 msgid "Off"
 msgstr "Выкл."
 
-#: handlers.py:108 handlers.py:222
+#: handlers.py:108 handlers.py:224
 msgid "on"
 msgstr "включен"
 
-#: handlers.py:110 handlers.py:224
+#: handlers.py:110 handlers.py:226
 msgid "off"
 msgstr "выключен"
 
@@ -63,11 +63,11 @@ msgstr "Язык был изменен на Русский!"
 msgid "Tags format was changed to {fmt}"
 msgstr "Формат тегов изменен на {fmt}"
 
-#: handlers.py:162
+#: handlers.py:161
 msgid "Thank you for rating!"
 msgstr "Спасибо за оценку!"
 
-#: handlers.py:197 handlers.py:349
+#: handlers.py:198 handlers.py:354
 msgid ""
 "No token for Yandex.disk! Please, recieve token: <a "
 "href=\"{url}\">Token</a>\n"
@@ -77,51 +77,51 @@ msgstr ""
 "href=\"{url}\">Токен</a>\n"
 "И добавьте командой /yandex_token ВАШ_ТОКЕН"
 
-#: handlers.py:205
+#: handlers.py:207
 msgid "Please, rate the result!"
 msgstr "Пожалуйста, оцените результат!"
 
-#: handlers.py:215
+#: handlers.py:217
 msgid "Choose rating setting:"
 msgstr "Выберите настройку рейтинга:"
 
-#: handlers.py:220
+#: handlers.py:222
 msgid "Wrong format! Should be /rating 1/0/on/off"
 msgstr "Неправильный формат! Должно быть /rating + 1/0/on/off"
 
-#: handlers.py:225
+#: handlers.py:227
 msgid "Rating was turned {}"
 msgstr "Рейтинг был"
 
-#: handlers.py:237
+#: handlers.py:239
 msgid "Choose your language:"
 msgstr "Выберите ваш язык:"
 
-#: handlers.py:239
+#: handlers.py:241
 msgid "No arguments! Should be /lang {lang}"
 msgstr "Нет аргументов! Должно быть /lang {lang}"
 
-#: handlers.py:246
+#: handlers.py:248
 msgid "Language was change to English!"
 msgstr "Язык был изменен на Русский!"
 
-#: handlers.py:248
+#: handlers.py:250
 msgid "Language not supported or wrong format!"
 msgstr "Язык не поддерживается или неправильный формат!"
 
-#: handlers.py:258
+#: handlers.py:260
 msgid "Choose tags format:"
 msgstr "Выберите формат тегов:"
 
-#: handlers.py:267
+#: handlers.py:269
 msgid "Tags format was changed to {tag_value}"
 msgstr "Формат тегов изменен на {tag_value}"
 
-#: handlers.py:269
+#: handlers.py:271
 msgid "Wrong tags format!"
 msgstr "Неправильный формат тегов!"
 
-#: handlers.py:277
+#: handlers.py:281
 msgid ""
 "<b>Picpack Bot</b>\n"
 "<b><i>Description:</i></b>\n"
@@ -141,16 +141,17 @@ msgid ""
 "/feedback - leave feedback about our bot\n"
 "\n"
 "<b><i>Yandex.disk:</i></b>\n"
-"/yandex - saving images to Yandex.Disk turn on/off (1, 0, on, off)\n"
+"/yandex_token YOUR_TOKEN - change Yandex.disk token\n"
+"Get token: <a href=\"{url}\">Token</a>/yandex - saving images to "
+"Yandex.Disk turn on/off (1, 0, on, off)\n"
 "/only_save_to_yandex - saving images without tags to Yandex.Disk turn "
 "on/off (1, 0, on, off)\n"
-"/yandex_token YOUR_TOKEN - change Yandex.disk token\n"
-"Get token: <a href=\"{url}\">Token</a>"
 msgstr ""
 "<b>Picpack Bot</b>\n"
 "<b><i>Описание:</i></b>\n"
-"Бот создает описание и список тегов для любого изображения. Просто "
-"пришлитекартинку\n"
+"Бот создает описание и список тегов "
+"для любого изображения. Просто пришлите "
+"картинку\n"
 "И он поддерживает ссылки на изображения\n"
 "Также бот поддерживет сохранение картинок на Яндекс.диск\n"
 "В группе бот только сохранет изображения, сортируя по тэгам\n"
@@ -164,13 +165,15 @@ msgstr ""
 "/feedback - оставьте отзыв о нашем боте\n"
 "\n"
 "<b><i>Яндекс.диск:</i></b>\n"
-"/yandex - сохранение на Яндекс.диск включено/выключено (1, 0, on, off)\n"
-"/only_save_to_yandex - сохранение на Яндекс.диск без тегов "
-"включено/выключено (1, 0, on, off)\n"
 "/yandex_token ВАШ_ТОКЕН - изменить токен Яндекс.диска\n"
 "Получить токен: <a href=\"{url}\">Токен</a>"
+"/yandex - сохранение на Яндекс.диск "
+"включено/выключено (1, 0, on, off)\n"
+"/only_save_to_yandex - сохранение на "
+"Яндекс.диск без тегов включено/выключено (1,"
+" 0, on, off)\n"
 
-#: handlers.py:298
+#: handlers.py:303
 msgid ""
 "<b>Picpack Bot</b>\n"
 "<b><i>Description:</i></b>\n"
@@ -203,48 +206,49 @@ msgstr ""
 "Это групповой режим!\n"
 "Посетите наш чат: http://app.picpack.io/demo_ru\n"
 "Чат с владельцем: @FrankShikhaliev\n"
-"Ниже список доступных команд, также они имеют аргументы"
-" (в скобках):\n"
+"Ниже список доступных команд, также они имеют аргументы (в скобках):\n"
 "/lang - изменить язык ({langs})\n"
 "/yandex - сохранение на Яндекс.диск включено/выключено (1, 0, on, off)\n"
 "/only_save_to_yandex - сохранение на Яндекс.диск без тегов "
 "включено/выключено (1, 0, on, off)\n"
 "/yandex_token ВАШ_ТОКЕН - изменить токен Яндекс.диска\n"
-"/sort, /save - отсортировать или сохранить картинки, когда режим конфиденциальности включен\n"
+"/sort, /save - отсортировать или сохранить картинки, когда режим "
+"конфиденциальности включен\n"
 
-#: handlers.py:333
+#: handlers.py:338
 msgid "Thank you for feedback!"
 msgstr "Спасибо за отзыв!"
 
-#: handlers.py:340
+#: handlers.py:345
 msgid "Please, leave feedback:"
 msgstr "Пожалуйста, оставьте отзыв:"
 
-#: handlers.py:380
-msgid "Sorry, bot doesn't support videos!"
+#: handlers.py:387
+#, fuzzy
+msgid "Sorry, bot doesn't support videos and animations!"
 msgstr "Извините, бот не поддерживает видео!"
 
-#: handlers.py:386
+#: handlers.py:393
 msgid "Sorry, bot doesn't support this file format!"
 msgstr "Извините, бот не поддерживает этот формат файла!"
 
-#: handlers.py:395
+#: handlers.py:402
 msgid "Token is missing! Should be /yandex_token YOUR_TOKEN"
 msgstr "Не найден токен! Должно быть /yandex_token ВАШ_ТОКЕН"
 
-#: handlers.py:400
+#: handlers.py:407
 msgid "Token is invalid! Please, get new one: <a href=\"{url}\">Token</a>"
 msgstr "Токен неверный! Пожалуйста, получите новый: <a href=\"{url}\">Токен</a>"
 
-#: handlers.py:403
+#: handlers.py:410
 msgid "Token was changed, but not verified"
 msgstr "Токен был изменен, но не проверен"
 
-#: handlers.py:405
+#: handlers.py:412
 msgid "Token was changed and verified"
 msgstr "Токен был изменен, но не проверен"
 
-#: handlers.py:436
+#: handlers.py:443
 msgid ""
 "Downloading to Yandex.disk was turned on.\n"
 "But you should recieve Yandex token: <a href=\"{url}\">Token</a>\n"
@@ -254,59 +258,59 @@ msgstr ""
 "Но вы должны получить токен Яндекса: <a href=\"{url}\">Токен</a>\n"
 "Затем добавьте его командой /yandex_token ВАШ_ТОКЕН"
 
-#: handlers.py:438
+#: handlers.py:445
 msgid "Downloading to Yandex.disk was turned on"
 msgstr "Загрузка на Яндекс.диск была включена"
 
-#: handlers.py:440
+#: handlers.py:447
 msgid "Downloading to Yandex.disk was turned off"
 msgstr "Загрузка на Яндекс.диск была выключена"
 
-#: handlers.py:455
+#: handlers.py:460
 msgid "Bad arguments! Should be /only_save_to_yandex 1/0/on/off"
 msgstr "Неверные аргументы! Должно быть Should be /only_save_to_yandex 1/0/on/off"
 
-#: handlers.py:462
+#: handlers.py:467
 msgid "Images will be only save to Yandex.disk"
 msgstr "Изображения будут только сохранены на Яндекс.диск"
 
-#: handlers.py:464
+#: handlers.py:469
 msgid "Images will be with tags and save to Yandex.disk"
 msgstr "Изображения будут сохранены по тегам на Яндекс.диск"
 
-#: handlers.py:471
+#: handlers.py:476
 msgid "Please, reply this message with image"
 msgstr "Пожалуйста, ответьте на сообщение изображением"
 
-#: handlers.py:477
+#: handlers.py:483
 msgid "Don't understand you!"
 msgstr "Не понимаю Вас!"
 
-#: utils.py:85
+#: utils.py:37
 msgid "<b>Invalid photo url!<b>"
 msgstr "<b>Неверный адрес фото!</b>"
 
-#: utils.py:87
+#: utils.py:39
 msgid "<b>Service unavailable!</b>"
 msgstr "<b>Сервис недоступен!</b>"
 
-#: utils.py:90
+#: utils.py:42
 msgid "<b>Description:</b>"
 msgstr "<b>Описание:</b>"
 
-#: utils.py:95 utils.py:126
+#: utils.py:47 utils.py:78
 msgid "Service unavailable!"
 msgstr "Сервис недоступен!"
 
-#: utils.py:96
+#: utils.py:48
 msgid "<b>Tags:</b>"
 msgstr "<b>Теги:</b>"
 
-#: utils.py:121
+#: utils.py:73
 msgid "Sorry, tags not found!"
 msgstr "Извините, теги не найдены!"
 
-#: utils.py:147
+#: utils.py:99
 msgid ""
 "Bad Yandex.disk token! Please, recieve new one: <a "
 "href=\"{url}\">Token</a>"
@@ -314,16 +318,62 @@ msgstr ""
 "Неверный токен Яндекс.диска! Пожалуйста, получите новый: <a "
 "href=\"{url}\">Токен</a>"
 
-#: utils.py:150
+#: utils.py:102
 msgid "Error while uploading to Yandex.disk!"
 msgstr "Ошибка по время загрузки на Яндекс.диск!"
 
-#: env/lib/python3.9/site-packages/isort/main.py:158
-msgid "show this help message and exit"
-msgstr ""
 
-#: env/lib/python3.9/site-packages/mypy/main.py:368
-#, python-format
-msgid "%(prog)s: error: %(message)s\n"
-msgstr ""
+#~ msgid ""
+#~ "<b>Picpack Bot</b>\n"
+#~ "<b><i>Description:</i></b>\n"
+#~ "Bot generates description and list of"
+#~ " tags for any image. Just send "
+#~ "a picture\n"
+#~ "And it supports link to image\n"
+#~ "Also bot support saving pictures to your Yandex.disk\n"
+#~ "In group bot only saves images to Yandex.disk with sorting by tags\n"
+#~ "This is private mode!\n"
+#~ "Visit ower site: http://app.picpack.io/demo_en\n"
+#~ "Chat with owner: @FrankShikhaliev\n"
+#~ "Below is a list of available "
+#~ "commands, also they could have arguments"
+#~ " (in brackets):\n"
+#~ "/lang - change language ({langs})\n"
+#~ "/tags - change format tags (list, instagram)\n"
+#~ "/rating - rate result on/off (1, 0, on, off)\n"
+#~ "/feedback - leave feedback about our bot\n"
+#~ "\n"
+#~ "<b><i>Yandex.disk:</i></b>\n"
+#~ "/yandex - saving images to Yandex.Disk turn on/off (1, 0, on, off)\n"
+#~ "/only_save_to_yandex - saving images without"
+#~ " tags to Yandex.Disk turn on/off (1,"
+#~ " 0, on, off)\n"
+#~ "/yandex_token YOUR_TOKEN - change Yandex.disk token\n"
+#~ "Get token: <a href=\"{url}\">Token</a>"
+#~ msgstr ""
+#~ "<b>Picpack Bot</b>\n"
+#~ "<b><i>Описание:</i></b>\n"
+#~ "Бот создает описание и список тегов "
+#~ "для любого изображения. Просто пришлите "
+#~ "картинку\n"
+#~ "И он поддерживает ссылки на изображения\n"
+#~ "Также бот поддерживет сохранение картинок на Яндекс.диск\n"
+#~ "В группе бот только сохранет изображения, сортируя по тэгам\n"
+#~ "Это приватным режим!\n"
+#~ "Посетите наш сайт: http://app.picpack.io/demo_ru\n"
+#~ "Чат с владельцем: @FrankShikhaliev\n"
+#~ "Ниже список доступных команд, также они имеют аргументы (в скобках):\n"
+#~ "/lang - изменить язык ({langs})\n"
+#~ "/tags - изменить формат тэгов (list, instagram)\n"
+#~ "/rating - оценка результата включена/выключена (1, 0, on, off)\n"
+#~ "/feedback - оставьте отзыв о нашем боте\n"
+#~ "\n"
+#~ "<b><i>Яндекс.диск:</i></b>\n"
+#~ "/yandex - сохранение на Яндекс.диск "
+#~ "включено/выключено (1, 0, on, off)\n"
+#~ "/only_save_to_yandex - сохранение на "
+#~ "Яндекс.диск без тегов включено/выключено (1,"
+#~ " 0, on, off)\n"
+#~ "/yandex_token ВАШ_ТОКЕН - изменить токен Яндекс.диска\n"
+#~ "Получить токен: <a href=\"{url}\">Токен</a>"
 

@@ -15,7 +15,7 @@
     ```
 - dev: 
     ```
-    docker-compose -f docker-compose.prod.yml up --build
+    docker-compose -f docker-compose.dev.yml up --build
     ```
 - prod использует метод webhook, dev - polling
 

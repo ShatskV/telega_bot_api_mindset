@@ -1,36 +1,25 @@
 """DB models."""
-import os
-
 import asyncio
+from email.policy import default
 import enum
-from datetime import datetime
 
-from sqlalchemy import (Boolean, Column, DateTime, Integer, String, BIGINT,
-                       MetaData)
+from sqlalchemy import (BIGINT, Boolean, Column, DateTime, Integer, MetaData,
+                        String)
 from sqlalchemy.dialects.postgresql import ENUM
-from sqlalchemy.ext.asyncio import (AsyncSession,
-                                    create_async_engine)
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.sql import func
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.sql.sqltypes import DateTime
-from sqlalchemy.sql import func
+
 from config import settings
 
-# engine = create_engine(settings.SQLALCHEMY_URI)
-
-
-# engine = create_async_engine(settings.SQLALCHEMY_URI)
-engine = create_async_engine(os.environ.get('SQLALCHEMY_URI'))
+engine = create_async_engine(settings.SQLALCHEMY_URI)
 async_session = sessionmaker(bind=engine,  expire_on_commit=False, class_=AsyncSession)
-# async_session = sessionmaker(bind=engine,  expire_on_commit=True, class_=AsyncSession)
 
-# async_session_factory = sessionmaker(some_async_engine, class_=_AsyncSession)
-# AsyncSession = async_scoped_session(async_session_factory, scopefunc=asyncio.current_task)
-# async_session = AsyncSession()
 metadata = MetaData(schema='bot')
 Base = declarative_base(metadata=metadata)
-# Base.query = async_session.query_property()
 
 
 class MyEnumMeta(enum.EnumMeta):
@@ -47,6 +36,16 @@ class Action(enum.Enum, metaclass=MyEnumMeta):
     desc_tags = 'iu_decs_and_tags'
     desc = 'iu_decs'
     tags = 'iu_tags'
+
+
+class YandexAction(enum.Enum):
+    check = 'check_token'
+    upload = 'upload_file'
+
+
+class TypeUpdate(enum.Enum):
+    message = 'message'
+    callback = 'callback'
 
 
 class TgUser(Base):
@@ -81,39 +80,67 @@ class TgGroup(Base):
     yandex_on = Column(Boolean(), default=True)
     yandex_only_save = Column(Boolean(), default=False)
     yandex_token = Column(String(100))
+    create_at = Column(DateTime(timezone=False), default=func.now())
 
     def __repr__(self):
         return f'<Group_id {self.id}>'
 
 
-class TgAction(Base):
+class TgActionApi(Base):
     __tablename__ = 'tg_actions'
 
     id = Column(Integer, primary_key=True)
     tg_user_id = Column(Integer, ForeignKey(TgUser.tg_user_id, ondelete='CASCADE'))
     tg_chat_id = Column(BIGINT(), index=True)
-    action_type = Column(ENUM(Action))
+    tg_msg_id = Column(BIGINT(), index=True)
+    api_url = Column(String(250), index=True)
     image_uuid = Column(String(50), index=True)
-    image_name = Column(String)
+    is_success = Column(Boolean())
+    add_info = Column(String(500))
     lang = Column(String(4))
-    image_type = Column(String())
-    image_size = Column(Integer)
     create_at = Column(DateTime(timezone=False), default=func.now())
-    responce = Column(String(20000))
+    response = Column(String(20000))
 
     def __repr__(self):
         return f'<Telegram_user_action {self.telegram_user_id} {self.action}>'
 
 
+class TgYandexDisk(Base):
+    __tablename__ = 'tg_yandex_disk'
+    id = Column(Integer, primary_key=True)
+    tg_user_id = Column(BIGINT(), index=True)
+    tg_chat_id = Column(BIGINT(), index=True)
+    tg_msg_id = Column(BIGINT(), index=True)
+    token = Column(String(70))
+    is_success = Column(Boolean(), default=True, index=True)
+    file_path = Column(String(250))
+    yandex_action = Column(ENUM(YandexAction))
+    error = Column(String(1000))
+    create_at = Column(DateTime(timezone=False), default=func.now())
+
+
+    def __repr__(self):
+        return f'<Yandexdisk_action {self.tg_message_id} {self.yandex_action} {self.file_path}>'
+
+
 class TgChatHistory(Base):
     __tablename__ = 'tg_chat_history'
     id = Column(Integer, primary_key=True)
-    tg_msg_id = Column(Integer())
-    tg_user_id = Column(Integer(), ForeignKey(TgUser.tg_user_id, ondelete='CASCADE'), index=True)
+    type_update = Column(ENUM(TypeUpdate))
+    tg_msg_id = Column(Integer(), index=True)
+    tg_user_id = Column(Integer(), index=True)
     tg_chat_id = Column(BIGINT(), index=True)
-    user_msg = Column(String(10000))
-    bot_msg = Column(String(10000))
+    # user_msg = Column(String(10000))
+    callback_data = Column(String(150))
+    from_bot = Column(Boolean, default=True)
+    is_image = Column(Boolean, default=False)
+    file_id = Column(String(150), index=True)
+    text = Column(String(10000))
+    caption = Column(String(10000))
+    content_type = Column(String(50))
+    mime_type = Column(String(150))
     bot_message_edit = Column(Boolean, default=False)
+    is_delete = Column(Boolean, default=False)
     create_at = Column(DateTime(timezone=False), default=func.now())
 
 

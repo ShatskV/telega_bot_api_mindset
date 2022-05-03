@@ -28,6 +28,7 @@ class Config(object):
 
     USER_AGENT = {'User-agent': 'picpack_telegram_bot'}
     API_TOKEN = os.environ.get('API_TOKEN')
+    BOT_ID = API_TOKEN.split(':')[0]
 
     YADISK_PATH = '/picpack.io'
     YADISK_NOTAG = 'undefinied'

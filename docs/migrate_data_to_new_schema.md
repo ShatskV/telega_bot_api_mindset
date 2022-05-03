@@ -36,3 +36,8 @@ psql -U picpack_iu_dev -h localhost -p 35432 -d picpack_iu_dev < database_backup
 ```
 
 ### Check data in new tables or run the tests
+
+### Generate migration
+```
+alembic revision --autogenerate -m "Comment"
+```

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-03-20 19:31+0300\n"
+"POT-Creation-Date: 2022-05-03 20:31+0300\n"
 "PO-Revision-Date: 2022-01-30 19:09+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -42,11 +42,11 @@ msgstr ""
 msgid "Off"
 msgstr ""
 
-#: handlers.py:108 handlers.py:222
+#: handlers.py:108 handlers.py:224
 msgid "on"
 msgstr ""
 
-#: handlers.py:110 handlers.py:224
+#: handlers.py:110 handlers.py:226
 msgid "off"
 msgstr ""
 
@@ -62,62 +62,62 @@ msgstr ""
 msgid "Tags format was changed to {fmt}"
 msgstr ""
 
-#: handlers.py:162
+#: handlers.py:161
 msgid "Thank you for rating!"
 msgstr ""
 
-#: handlers.py:197 handlers.py:349
+#: handlers.py:198 handlers.py:354
 msgid ""
 "No token for Yandex.disk! Please, recieve token: <a "
 "href=\"{url}\">Token</a>\n"
 "And add with command /yandex_token YOUR_TOKEN"
 msgstr ""
 
-#: handlers.py:205
+#: handlers.py:207
 msgid "Please, rate the result!"
 msgstr ""
 
-#: handlers.py:215
+#: handlers.py:217
 msgid "Choose rating setting:"
 msgstr ""
 
-#: handlers.py:220
+#: handlers.py:222
 msgid "Wrong format! Should be /rating 1/0/on/off"
 msgstr ""
 
-#: handlers.py:225
+#: handlers.py:227
 msgid "Rating was turned {}"
 msgstr ""
 
-#: handlers.py:237
+#: handlers.py:239
 msgid "Choose your language:"
 msgstr ""
 
-#: handlers.py:239
+#: handlers.py:241
 msgid "No arguments! Should be /lang {lang}"
 msgstr ""
 
-#: handlers.py:246
+#: handlers.py:248
 msgid "Language was change to English!"
 msgstr ""
 
-#: handlers.py:248
+#: handlers.py:250
 msgid "Language not supported or wrong format!"
 msgstr ""
 
-#: handlers.py:258
+#: handlers.py:260
 msgid "Choose tags format:"
 msgstr ""
 
-#: handlers.py:267
+#: handlers.py:269
 msgid "Tags format was changed to {tag_value}"
 msgstr ""
 
-#: handlers.py:269
+#: handlers.py:271
 msgid "Wrong tags format!"
 msgstr ""
 
-#: handlers.py:277
+#: handlers.py:281
 msgid ""
 "<b>Picpack Bot</b>\n"
 "<b><i>Description:</i></b>\n"
@@ -137,14 +137,14 @@ msgid ""
 "/feedback - leave feedback about our bot\n"
 "\n"
 "<b><i>Yandex.disk:</i></b>\n"
-"/yandex - saving images to Yandex.Disk turn on/off (1, 0, on, off)\n"
+"/yandex_token YOUR_TOKEN - change Yandex.disk token\n"
+"Get token: <a href=\"{url}\">Token</a>/yandex - saving images to "
+"Yandex.Disk turn on/off (1, 0, on, off)\n"
 "/only_save_to_yandex - saving images without tags to Yandex.Disk turn "
 "on/off (1, 0, on, off)\n"
-"/yandex_token YOUR_TOKEN - change Yandex.disk token\n"
-"Get token: <a href=\"{url}\">Token</a>"
 msgstr ""
 
-#: handlers.py:298
+#: handlers.py:303
 msgid ""
 "<b>Picpack Bot</b>\n"
 "<b><i>Description:</i></b>\n"
@@ -167,104 +167,104 @@ msgid ""
 "/sort, /save - sort or save pictures when privacy mode is on\n"
 msgstr ""
 
-#: handlers.py:333
+#: handlers.py:338
 msgid "Thank you for feedback!"
 msgstr ""
 
-#: handlers.py:340
+#: handlers.py:345
 msgid "Please, leave feedback:"
 msgstr ""
 
-#: handlers.py:380
-msgid "Sorry, bot doesn't support videos!"
+#: handlers.py:387
+msgid "Sorry, bot doesn't support videos and animations!"
 msgstr ""
 
-#: handlers.py:386
+#: handlers.py:393
 msgid "Sorry, bot doesn't support this file format!"
 msgstr ""
 
-#: handlers.py:395
+#: handlers.py:402
 msgid "Token is missing! Should be /yandex_token YOUR_TOKEN"
 msgstr ""
 
-#: handlers.py:400
+#: handlers.py:407
 msgid "Token is invalid! Please, get new one: <a href=\"{url}\">Token</a>"
 msgstr ""
 
-#: handlers.py:403
+#: handlers.py:410
 msgid "Token was changed, but not verified"
 msgstr ""
 
-#: handlers.py:405
+#: handlers.py:412
 msgid "Token was changed and verified"
 msgstr ""
 
-#: handlers.py:436
+#: handlers.py:443
 msgid ""
 "Downloading to Yandex.disk was turned on.\n"
 "But you should recieve Yandex token: <a href=\"{url}\">Token</a>\n"
 "Then add token with command /yandex_token YOUR_TOKEN"
 msgstr ""
 
-#: handlers.py:438
+#: handlers.py:445
 msgid "Downloading to Yandex.disk was turned on"
 msgstr ""
 
-#: handlers.py:440
+#: handlers.py:447
 msgid "Downloading to Yandex.disk was turned off"
 msgstr ""
 
-#: handlers.py:455
+#: handlers.py:460
 msgid "Bad arguments! Should be /only_save_to_yandex 1/0/on/off"
 msgstr ""
 
-#: handlers.py:462
+#: handlers.py:467
 msgid "Images will be only save to Yandex.disk"
 msgstr ""
 
-#: handlers.py:464
+#: handlers.py:469
 msgid "Images will be with tags and save to Yandex.disk"
 msgstr ""
 
-#: handlers.py:471
+#: handlers.py:476
 msgid "Please, reply this message with image"
 msgstr ""
 
-#: handlers.py:477
+#: handlers.py:483
 msgid "Don't understand you!"
 msgstr ""
 
-#: utils.py:85
+#: utils.py:37
 msgid "<b>Invalid photo url!<b>"
 msgstr ""
 
-#: utils.py:87
+#: utils.py:39
 msgid "<b>Service unavailable!</b>"
 msgstr ""
 
-#: utils.py:90
+#: utils.py:42
 msgid "<b>Description:</b>"
 msgstr ""
 
-#: utils.py:95 utils.py:126
+#: utils.py:47 utils.py:78
 msgid "Service unavailable!"
 msgstr ""
 
-#: utils.py:96
+#: utils.py:48
 msgid "<b>Tags:</b>"
 msgstr ""
 
-#: utils.py:121
+#: utils.py:73
 msgid "Sorry, tags not found!"
 msgstr ""
 
-#: utils.py:147
+#: utils.py:99
 msgid ""
 "Bad Yandex.disk token! Please, recieve new one: <a "
 "href=\"{url}\">Token</a>"
 msgstr ""
 
-#: utils.py:150
+#: utils.py:102
 msgid "Error while uploading to Yandex.disk!"
 msgstr ""
 
@@ -309,5 +309,37 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "Test group"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "<b>Picpack Bot</b>\n"
+#~ "<b><i>Description:</i></b>\n"
+#~ "Bot generates description and list of"
+#~ " tags for any image. Just send "
+#~ "a picture\n"
+#~ "And it supports link to image\n"
+#~ "Also bot support saving pictures to your Yandex.disk\n"
+#~ "In group bot only saves images to Yandex.disk with sorting by tags\n"
+#~ "This is private mode!\n"
+#~ "Visit ower site: http://app.picpack.io/demo_en\n"
+#~ "Chat with owner: @FrankShikhaliev\n"
+#~ "Below is a list of available "
+#~ "commands, also they could have arguments"
+#~ " (in brackets):\n"
+#~ "/lang - change language ({langs})\n"
+#~ "/tags - change format tags (list, instagram)\n"
+#~ "/rating - rate result on/off (1, 0, on, off)\n"
+#~ "/feedback - leave feedback about our bot\n"
+#~ "\n"
+#~ "<b><i>Yandex.disk:</i></b>\n"
+#~ "/yandex - saving images to Yandex.Disk turn on/off (1, 0, on, off)\n"
+#~ "/only_save_to_yandex - saving images without"
+#~ " tags to Yandex.Disk turn on/off (1,"
+#~ " 0, on, off)\n"
+#~ "/yandex_token YOUR_TOKEN - change Yandex.disk token\n"
+#~ "Get token: <a href=\"{url}\">Token</a>"
+#~ msgstr ""
+
+#~ msgid "Sorry, bot doesn't support videos!"
 #~ msgstr ""
 

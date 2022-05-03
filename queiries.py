@@ -1,13 +1,15 @@
 """Queries from DB."""
+from typing import Union
 import logging
 
 from aiogram.types import Message
+from aiogram.types import CallbackQuery as Callback
 
 from asyncpg.exceptions import (InterfaceError, InternalClientError,
                                 PostgresError)
 
-from db import TgGroup, TgUser, CallbackQuery, async_session
-
+from db import TgChatHistory, TgGroup, TgUser, CallbackQuery, TgYandexDisk, async_session
+from history_utils import create_api_history
 from config import settings
 
 from sqlalchemy import update
@@ -74,6 +76,26 @@ async def update_group(msg: Message, **kwargs):
                            atr_val=tg_chat_id,
                            **kwargs)
 
+async def get_message(message_id):
+    """Get message from DB."""
+    result = await get_obj_from_db(cls=TgChatHistory,
+                                   cls_atr='tg_msg_id',
+                                   atr_val=message_id)
+    try:
+        (message, ) = result.first()
+    except NoResultFound:
+        message = None
+    return message
+
+
+async def update_message(message_id, **kwargs):
+    message = await get_message(message_id=message_id)
+    if message:
+        await update_obj_in_db(cls=TgChatHistory,
+                               cls_atr='id',
+                               atr_val=message.id,
+                               **kwargs)
+
 
 async def get_user_from_db(tg_user_id):
     """Get user from DB."""
@@ -105,6 +127,27 @@ async def add_rating_query(msg_id, uuid):
     msg = CallbackQuery(message_id=msg_id,
                         image_uuid=uuid)
     await add_object_to_db(msg)
+
+
+async def add_api_history(msg: Union[Message, Callback], url, payload, result):
+    cls_api = create_api_history(msg=msg, url=url, payload=payload, result=result)
+    await add_object_to_db(cls_api)
+
+
+async def add_yandex_query(ya_log, message: Union[Message, Callback]):
+    if isinstance(message, Callback):
+        message = message.message
+    is_success = False if ya_log.get('error', False) else True
+    ya_his = TgYandexDisk(tg_user_id=message.from_user.id,
+                          tg_chat_id=message.chat.id,
+                          tg_msg_id=message.message_id,
+                          token=ya_log.get('token', None),
+                          is_success=is_success,
+                          file_path=ya_log.get('file_path'),
+                          yandex_action=ya_log.get('action'),
+                          error=ya_log.get('error')
+                          )
+    await add_object_to_db(ya_his)
 
 
 async def get_uuid_from_db_query(msg_id):
@@ -139,6 +182,26 @@ async def get_obj_from_db(cls, cls_atr, atr_val, **kwargs):
     finally:
         await session.close()
     return result
+
+
+async def add_messages_to_db(list_msgs):
+    """Add messages to DB."""
+    try:
+        async with async_session() as session:
+            # for msg in list_msgs:
+            session.add_all(list_msgs)
+                # session.add(msg)
+            await session.commit()
+    except SQLAlchemyError as e:
+        logging.error('SQLAlchemy error!')
+        await session.rollback()
+        raise e
+    except (InterfaceError, InternalClientError,
+            PostgresError) as e:
+        logging.critical('Connection DB problem!')
+        raise e
+    finally:
+        await session.close()
 
 
 async def add_object_to_db(obj):
